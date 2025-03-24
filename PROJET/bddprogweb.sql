@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS FilmsSeries (
 -- Insérer une dizaine de films dans la table FilmsSeries
 INSERT INTO FilmsSeries (id_tmdb, titre, type_oeuvre, annee_sortie, poster, description, popularite)
 VALUES
-    (550, 'Fight Club', 'film', 1999, 'https://image.tmdb.org/t/p/w500/8d6dfl7T4Iu6rghRPt9qYzO2Jlo.jpg', 'A troubled man seeks the help of a self-help guru, but things take a dark turn.', 8.4),
+    (550, 'Fight Club', 'film', 1999, 'fightclub.jpg', 'A troubled man seeks the help of a self-help guru, but things take a dark turn.', 8.4),
     (680, 'The Dark Knight', 'film', 2008, 'https://image.tmdb.org/t/p/w500/2Xcq8tI0VbhBfWs1yGhX4MvOb5H.jpg', 'Batman faces off against the Joker, a criminal mastermind who seeks to create chaos in Gotham City.', 8.9),
     (157336, 'Interstellar', 'film', 2014, 'https://image.tmdb.org/t/p/w500/8ZFbImxk9zFWeKj5GzD6Zxfz3U6.jpg', 'A team of explorers travels through a wormhole in space in an attempt to ensure humanity\'s survival.', 8.6),
     (500, 'The Shawshank Redemption', 'film', 1994, 'https://image.tmdb.org/t/p/w500/9J4PczmUbNzx39sPrtFlkKqLzry.jpg', 'Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.', 9.3),

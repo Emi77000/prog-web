@@ -1,17 +1,36 @@
 <?php
+session_start();
 // Inclure la connexion à la base de données
-require_once('db_connection.php');
+require_once('config.php');
 
 // Récupérer un film aléatoire (ou tu peux récupérer celui avec la popularité la plus haute si tu préfères)
 $query = "SELECT * FROM FilmsSeries ORDER BY RAND() LIMIT 10";  // Pour un film aléatoire
 // Ou pour un film avec la popularité la plus élevée :
 /* $query = "SELECT * FROM FilmsSeries ORDER BY popularite DESC LIMIT 10"; */
 
-$stmt = $pdo->prepare($query);
-$stmt->execute();
 
-// Récupérer le film
-$featuredFilm = $stmt->fetch(PDO::FETCH_ASSOC);
+$id_utilisateur =1;
+
+// Connexion à la base de données
+try {
+    $pdo = new PDO(DB_DSN, DB_USER, DB_PASS, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+    ]);
+
+    $sql = "SELECT f.titre, f.poster, c.statut, c.note, c.commentaire
+        FROM Catalogue c
+        JOIN FilmsSeries f ON c.id_tmdb = f.id_tmdb
+        WHERE c.id_utilisateur = :id_utilisateur";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute(['id_utilisateur' => $id_utilisateur]);
+    $films = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+} catch (PDOException $e) {
+    die("Erreur de connexion : " . $e->getMessage());
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -29,23 +48,28 @@ $featuredFilm = $stmt->fetch(PDO::FETCH_ASSOC);
             <ul>
                 <li><a href="index.php">Accueil</a></li>
                 <li><a href="login.html">Connexion</a></li>
-                <li><a href="register.html">Inscription</a></li>
             </ul>
         </nav>
     </header>
 
-    <section class="featured">
-        <h2>Film en vedette</h2>
-        <?php if ($featuredFilm): ?>
-            <div class="movie-details">
-                <h3><?= htmlspecialchars($featuredFilm['titre']) ?></h3>
-                <p><img src="https://image.tmdb.org/t/p/w500/<?= htmlspecialchars($featuredFilm['poster']) ?>" alt="Affiche de <?= htmlspecialchars($featuredFilm['titre']) ?>"></p>
-                <p><strong>Description:</strong> <?= htmlspecialchars($featuredFilm['description']) ?></p>
-                <p><a href="add_to_catalogue.php?movie_id=<?= $featuredFilm['id_tmdb'] ?>">Ajouter au catalogue</a></p>
-            </div>
-        <?php else: ?>
-            <p>Aucun film en vedette.</p>
-        <?php endif; ?>
+    <section class="catalogue">
+        <h2>Films et Séries Ajoutés</h2>
+        <div class="catalogue-grid">
+            <?php if (!empty($films)): ?>
+                <?php foreach ($films as $film): ?>
+                    <div class="catalogue-item">
+                        <img src="<?= htmlspecialchars($film['poster']) ?>" alt="<?= htmlspecialchars($film['titre']) ?>">
+                        <h3><?= htmlspecialchars($film['titre']) ?></h3>
+                        <p><strong>Statut:</strong> <?= htmlspecialchars($film['statut']) ?></p>
+                        <p><strong>Note:</strong> <?= $film['note'] ? "⭐".str_repeat("⭐", floor($film['note'])-1)." (".$film['note']."/5)" : "Non noté" ?></p>
+                        <p><strong>Commentaire:</strong> <?= nl2br(htmlspecialchars(isset($film['commentaire']) ? $film['commentaire'] : 'Aucun commentaire')) ?></p>
+                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <p>Aucun film ou série ajouté pour l'instant.</p>
+            <?php endif; ?>
+
+        </div>
     </section>
 
     <footer>

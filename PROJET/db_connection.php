@@ -2,8 +2,8 @@
 // Configuration de la connexion à la base de données
 $host = 'localhost';  // Hôte de la base de données (par défaut, c'est localhost)
 $dbname = 'suivi_films_series';  // Nom de la base de données
-$username = 'root';  // Nom d'utilisateur MySQL
-$password = '123soleil';  // Mot de passe MySQL (modifiez-le si nécessaire)
+$username = 'emmataieb';  // Nom d'utilisateur MySQL
+$password = 'password';  // Mot de passe MySQL (modifiez-le si nécessaire)
 
 try {
     // Création d'une instance PDO pour se connecter à la base de données
@@ -14,7 +14,7 @@ try {
     
     // Optionnel : définir le charset pour éviter les problèmes d'encodage
     $pdo->exec("SET NAMES 'utf8'");
-    
+
     // Si la connexion est réussie
     // echo "Connexion réussie à la base de données.";
 } catch (PDOException $e) {

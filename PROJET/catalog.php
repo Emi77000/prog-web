@@ -24,7 +24,7 @@ $films = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <h1>Mon Catalogue</h1>
         <nav>
             <ul>
-                <li><a href="index.html">Accueil</a></li>
+                <li><a href="catalogPerso.html">Accueil</a></li>
                 <li><a href="logout.php">Déconnexion</a></li>
             </ul>
         </nav>

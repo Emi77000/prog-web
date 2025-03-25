@@ -40,11 +40,11 @@ if (isset($_GET['id'])) {
 
     <header class="header">
         <div class="logo">
-            <a href="index.php">Suivi Films</a>
+            <a href="PROJET/accueil.php">Suivi Films</a>
         </div>
         <nav>
             <ul>
-                <li><a href="index.php">Accueil</a></li>
+                <li><a href="PROJET/accueil.php">Accueil</a></li>
                 <li><a href="catalog.php">Catalogue</a></li>
                 <li><a href="login.html">Connexion</a></li>
             </ul>

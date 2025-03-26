@@ -19,7 +19,7 @@ try {
     ]);
 
     // Récupérer les films/séries ajoutés par l'utilisateur
-    $sql = "SELECT f.titre, f.poster, c.statut, c.note, c.commentaire
+    $sql = "SELECT f.id_tmdb, f.titre, f.poster, c.statut, c.note, c.commentaire
             FROM Catalogue c
             JOIN FilmsSeries f ON c.id_tmdb = f.id_tmdb
             WHERE c.id_utilisateur = :id_utilisateur";
@@ -58,12 +58,31 @@ try {
     <div class="catalogue-grid">
         <?php if (!empty($films)): ?>
             <?php foreach ($films as $film): ?>
-                <div class="catalogue-item">
+                <div class="catalogue-item" data-id="<?= $film['id_tmdb'] ?>">
                     <img src="<?= htmlspecialchars($film['poster']) ?>" alt="<?= htmlspecialchars($film['titre']) ?>">
                     <h3><?= htmlspecialchars($film['titre']) ?></h3>
-                    <p><strong>Statut:</strong> <?= htmlspecialchars($film['statut']) ?></p>
-                    <p><strong>Note:</strong> <?= $film['note'] ? "⭐".str_repeat("⭐", floor($film['note'])-1)." (".$film['note']."/5)" : "Non noté" ?></p>
-                    <p><strong>Commentaire:</strong> <?= nl2br(htmlspecialchars($film['commentaire'] ?? 'Aucun commentaire')) ?></p>
+
+                    <!-- Menu déroulant pour le statut -->
+                    <label>Statut :</label>
+                    <select class="styled-select update-field" data-field="statut">
+                        <option value="à voir" <?= $film['statut'] == 'à voir' ? 'selected' : '' ?>>À voir</option>
+                        <option value="en cours" <?= $film['statut'] == 'en cours' ? 'selected' : '' ?>>En cours</option>
+                        <option value="vu" <?= $film['statut'] == 'vu' ? 'selected' : '' ?>>Vu</option>
+                    </select>
+
+                    <!-- Champ pour la note -->
+                    <label>Note :</label>
+                    <div class="rating" data-film-id="<?= $film['id_tmdb'] ?>">
+                        <?php for ($i = 5; $i >= 1; $i--): ?>
+                            <input type="radio" id="star<?= $i ?>-<?= $film['id_tmdb'] ?>" name="note-<?= $film['id_tmdb'] ?>" value="<?= $i ?>" class="update-star" <?= ($film['note'] == $i) ? 'checked' : '' ?>>
+                            <label for="star<?= $i ?>-<?= $film['id_tmdb'] ?>">★</label>
+                        <?php endfor; ?>
+                    </div>
+
+
+                    <!-- Zone de texte pour le commentaire -->
+                    <label>Commentaire :</label>
+                    <textarea class="styled-textarea update-field" data-field="commentaire"><?= htmlspecialchars($film['commentaire'] ?? '') ?></textarea>
                 </div>
             <?php endforeach; ?>
         <?php else: ?>
@@ -71,6 +90,77 @@ try {
         <?php endif; ?>
     </div>
 </section>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Gère la mise à jour des statuts et commentaires
+        document.querySelectorAll(".update-field").forEach(field => {
+            field.addEventListener("change", updateField);
+            field.addEventListener("input", updateField);
+        });
+
+        // Gère la mise à jour des notes (étoiles)
+        document.querySelectorAll(".update-star").forEach(star => {
+            star.addEventListener("change", function () {
+                let filmId = this.closest(".catalogue-item")?.dataset.id;
+                let fieldName = "note";
+                let fieldValue = this.value;
+
+                console.log("Modification de la note :", { filmId, fieldName, fieldValue });
+
+                if (!filmId) {
+                    console.error("Problème avec l'ID du film !");
+                    return;
+                }
+
+                fetch("modifier_catalogue.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: `id_tmdb=${filmId}&field=${fieldName}&value=${encodeURIComponent(fieldValue)}`
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            console.log("Note mise à jour avec succès !");
+                        } else {
+                            console.error("Erreur SQL :", data.error);
+                        }
+                    })
+                    .catch(error => console.error("Erreur AJAX :", error));
+            });
+        });
+
+        function updateField(event) {
+            let field = event.target;
+            let filmId = field.closest(".catalogue-item")?.dataset.id;
+            let fieldName = field.dataset.field;
+            let fieldValue = field.value;
+
+            console.log("Tentative de modification :", { filmId, fieldName, fieldValue });
+
+            if (!filmId || !fieldName) {
+                console.error("Problème avec les données envoyées !");
+                return;
+            }
+
+            fetch("modifier_catalogue.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: `id_tmdb=${filmId}&field=${fieldName}&value=${encodeURIComponent(fieldValue)}`
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log("Mise à jour réussie !");
+                    } else {
+                        console.error("Erreur SQL :", data.error);
+                    }
+                })
+                .catch(error => console.error("Erreur AJAX :", error));
+        }
+    });
+
+</script>
 
 <footer>
     <p>&copy; 2025 Suivi Films et Séries</p>

@@ -1,215 +1,254 @@
-body {
-    font-family: Arial, sans-serif;
+/* Réinitialisation de base */
+* {
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
+    box-sizing: border-box;
 }
 
-header {
-    background-color: #333;
+/* Fond noir pour toute la page */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #141414;
     color: white;
-    padding: 10px 0;
+}
+
+/* Style de l'en-tête (Header) */
+header {
+    background-color: #141414;
+    color: white;
+    padding: 15px 0;
     text-align: center;
+    border-bottom: 1px solid #333;
 }
 
 nav ul {
     list-style: none;
     padding: 0;
+    text-align: center;
 }
 
 nav ul li {
-    display: inline;
-    margin: 0 10px;
+    display: inline-block;
+    margin: 0 20px;
 }
 
 nav ul li a {
     color: white;
     text-decoration: none;
+    font-size: 18px;
+    font-weight: bold;
+    transition: color 0.3s ease;
 }
 
-h1 {
-    margin: 0;
+nav ul li a:hover {
+    color: #e50914;
 }
 
-h2 {
-    color: #333;
+/* Style de la section principale */
+main {
+    margin-top: 30px;
 }
 
-section {
-    padding: 20px;
-}
-
- body {
-     font-family: Arial, sans-serif;
-     margin: 0;
-     padding: 0;
-     background-color: #f4f4f4;
- }
-
-header {
-    background: #333;
-    color: white;
-    padding: 15px;
-    text-align: center;
-}
-
+/* Section des films */
 .catalogue {
-    max-width: 1000px;
-    margin: 20px auto;
-    padding: 20px;
-    background: white;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
+.catalogue h2 {
+    font-size: 2em;
+    margin: 20px 0;
+    text-align: center;
+    color: #e50914;
+}
+
+/* Grille des films */
 .catalogue-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 20px;
     padding: 20px;
+    margin-bottom: 50px;
 }
 
 .catalogue-item {
-    background: white;
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-    text-align: center;
+    background: #333;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+    position: relative;
+    transition: transform 0.3s ease-in-out;
+}
+
+.catalogue-item:hover {
+    transform: scale(1.05);
 }
 
 .catalogue-item img {
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: cover;
     border-radius: 5px;
 }
 
 .catalogue-item h3 {
-    font-size: 1.2em;
-    margin: 10px 0;
+    font-size: 1.1em;
+    margin: 10px;
+    text-align: center;
+    color: white;
 }
 
 .catalogue-item p {
     font-size: 0.9em;
     margin: 5px 0;
-}
-
-.catalogue-item a {
-    display: inline-block;
-    margin-top: 10px;
-    padding: 5px 10px;
-    background: #007bff;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-}
-
-.catalogue-item a:hover {
-    background: #0056b3;
-}
-
-.auth-container {
-    display: flex;
-    gap: 20px;
+    color: #ccc;
     text-align: center;
 }
-.auth-box {
-    background: white;
+
+/* Pied de page */
+footer {
+    text-align: center;
     padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 300px;
+    background: #141414;
+    color: white;
+    font-size: 1em;
 }
-.message {
+
+footer p {
+    margin: 0;
+}
+
+/* Animation pour le "hover" sur les films */
+.catalogue-item:hover img {
+    opacity: 0.8;
+}
+
+/* Ajouter un effet de dégradé sombre sur le texte */
+.catalogue-item .text-overlay {
+    position: absolute;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    width: 100%;
+    padding: 10px;
     text-align: center;
-    color: red;
-    margin-top: 10px;
+    color: white;
+    font-weight: bold;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.catalogue-item:hover .text-overlay {
+    opacity: 1;
+}
+
+/* Mettre à jour la section de navigation pour un design plus moderne */
+nav ul {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
 }
 
 
-
-input {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+/* Header */
+.header {
+    background-color: #141414;
+    padding: 10px 0;
+    text-align: center;
 }
 
-button {
-    width: 100%;
-    padding: 10px;
-    background: #007BFF;
+.header .logo a {
+    font-size: 2em;
     color: #fff;
+    text-decoration: none;
+}
+
+/* Catalogue */
+.catalogue {
+    margin-top: 20px;
+    padding: 0;
+}
+
+.catalogue h2 {
+    color: #fff;
+    font-size: 2em;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Grille des films */
+.catalogue-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.catalogue-item {
+    position: relative;
+    background-color: #333;
+    color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.catalogue-item img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    transition: opacity 0.3s ease;
+}
+
+.catalogue-item:hover {
+    transform: scale(1.05);
+}
+
+.catalogue-item:hover img {
+    opacity: 0.7;
+}
+
+/* Infos du film */
+.catalogue-item h3 {
+    font-size: 1.2em;
+    padding: 10px;
+    margin: 0;
+}
+
+.catalogue-item p {
+    font-size: 0.9em;
+    padding: 10px;
+    margin: 0;
+}
+
+.catalogue-item .description {
+    font-size: 0.8em;
+    padding: 10px;
+}
+
+.catalogue-item button {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    background-color: #e50914;
+    color: white;
     border: none;
     border-radius: 5px;
+    font-size: 1em;
     cursor: pointer;
 }
 
-button:hover {
-    background: #0056b3;
+.catalogue-item button:hover {
+    background-color: #f40612;
 }
-
-.error {
-    color: red;
-    font-size: 14px;
-}
-
-.catalogue-form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 400px;
-}
-
-.styled-select,
-.styled-input,
-.styled-textarea {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 16px;
-}
-
-.styled-textarea {
-    height: 80px;
-    resize: none;
-}
-
-.rating {
-    display: flex;
-    flex-direction: row-reverse;
-    justify-content: center;
-    gap: 5px;
-}
-
-.rating input {
-    display: none;
-}
-
-.rating label {
-    font-size: 25px;
-    cursor: pointer;
-    color: #ccc;
-    transition: color 0.2s;
-}
-
-.rating input:checked ~ label,
-.rating label:hover,
-.rating label:hover ~ label {
-    color: gold;
-}
-
 
 footer {
     text-align: center;
     padding: 10px;
-    background: #333;
+    background-color: #141414;
     color: white;
-    margin-top: 20px;
 }

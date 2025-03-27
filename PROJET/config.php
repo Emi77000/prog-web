@@ -1,7 +1,7 @@
 <?php
 $host = "localhost"; // Hôte de la base de données
-$username = "emmataieb";  // Nom d'utilisateur MySQL
-$password = "password";      // Mot de passe MySQL
+$username = "root";  // Nom d'utilisateur MySQL
+$password = "123soleil";      // Mot de passe MySQL
 $dbname = "suivi_films_series"; // Nom de la base de données
 
 // Connexion à la base de données

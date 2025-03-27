@@ -24,16 +24,6 @@ try {
     // Activer le mode exception PDO pour voir les erreurs SQL
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // Vérifier si l'utilisateur existe dans la base
-    $checkUserQuery = "SELECT id_utilisateur FROM Utilisateurs WHERE id_utilisateur = :id_utilisateur";
-    $checkUserStmt = $pdo->prepare($checkUserQuery);
-    $checkUserStmt->execute(['id_utilisateur' => $user_id]);
-
-    if ($checkUserStmt->rowCount() === 0) {
-        echo json_encode(["error" => "Utilisateur introuvable."]);
-        exit;
-    }
-
     // Vérifier si le film existe dans FilmsSeries
     $checkFilmQuery = "SELECT id_tmdb FROM FilmsSeries WHERE id_tmdb = :id_tmdb";
     $checkFilmStmt = $pdo->prepare($checkFilmQuery);
@@ -68,3 +58,65 @@ try {
     echo json_encode(["error" => "Erreur : " . $e->getMessage()]);
 }
 ?>
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajout au Catalogue</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Ajouter un film au catalogue</h1>
+    </header>
+
+    <section class="catalogue">
+        <h2>Films disponibles</h2>
+        <div class="films-list">
+            <!-- Exemple de film, remplace par une boucle ou du contenu dynamique -->
+            <div class="film-item" data-id="12345">
+                <img src="https://image.tmdb.org/t/p/w500/abcd1234.jpg" alt="Film 1">
+                <h3>Film 1</h3>
+                <button class="add-to-catalogue" data-id="12345">Ajouter au catalogue</button>
+            </div>
+            <!-- Tu peux ajouter d'autres films ici -->
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 Suivi Films et Séries</p>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Gère l'événement pour ajouter le film au catalogue
+            document.querySelectorAll('.add-to-catalogue').forEach(button => {
+                button.addEventListener('click', function() {
+                    let id_tmdb = this.getAttribute('data-id');  // Récupérer l'ID du film
+
+                    // Envoyer la requête AJAX pour ajouter le film au catalogue
+                    fetch('add_to_catalog.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: `id_tmdb=${id_tmdb}`  // Envoyer l'ID du film dans la requête POST
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Film ajouté au catalogue !');  // Afficher un message de succès
+                            // Tu pourrais également mettre à jour l'interface pour afficher le film ajouté
+                        } else {
+                            alert(data.error);  // Afficher l'erreur si ça échoue
+                        }
+                    })
+                    .catch(error => console.error('Erreur AJAX:', error));  // Gérer les erreurs AJAX
+                });
+            });
+        });
+    </script>
+</body>
+</html>

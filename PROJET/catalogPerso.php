@@ -79,7 +79,6 @@ try {
                         <?php endfor; ?>
                     </div>
 
-
                     <!-- Zone de texte pour le commentaire -->
                     <label>Commentaire :</label>
                     <textarea class="styled-textarea update-field" data-field="commentaire"><?= htmlspecialchars($film['commentaire'] ?? '') ?></textarea>
@@ -105,8 +104,6 @@ try {
                 let filmId = this.closest(".catalogue-item")?.dataset.id;
                 let fieldName = "note";
                 let fieldValue = this.value;
-
-                console.log("Modification de la note :", { filmId, fieldName, fieldValue });
 
                 if (!filmId) {
                     console.error("Problème avec l'ID du film !");
@@ -136,8 +133,6 @@ try {
             let fieldName = field.dataset.field;
             let fieldValue = field.value;
 
-            console.log("Tentative de modification :", { filmId, fieldName, fieldValue });
-
             if (!filmId || !fieldName) {
                 console.error("Problème avec les données envoyées !");
                 return;
@@ -159,7 +154,6 @@ try {
                 .catch(error => console.error("Erreur AJAX :", error));
         }
     });
-
 </script>
 
 <footer>

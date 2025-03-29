@@ -19,7 +19,7 @@ try {
     ]);
 
     // Récupérer les films/séries ajoutés par l'utilisateur
-    $sql = "SELECT f.id_tmdb, f.titre, f.poster, c.statut, c.note, c.commentaire
+    $sql = "SELECT f.id_tmdb, f.titre, f.type_oeuvre, f.poster, c.statut, c.note, c.commentaire
             FROM Catalogue c
             JOIN FilmsSeries f ON c.id_tmdb = f.id_tmdb
             WHERE c.id_utilisateur = :id_utilisateur";
@@ -70,6 +70,60 @@ foreach ($films as $film) {
         .rating label:hover ~ label {
             color: #ffcc00;
         }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .tab-button {
+            background-color: #ddd;
+            border: none;
+            padding: 10px 20px;
+            margin: 0 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .tab-button.active {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .poster-container {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: rgba(255, 0, 0, 0.7);
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 50%;
+            line-height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        .delete-btn:hover {
+            background-color: rgba(255, 0, 0, 1);
+        }
+
+
+
     </style>
 </head>
 <body>
@@ -85,13 +139,23 @@ foreach ($films as $film) {
 
 <section class="catalogue">
     <h2>Films et Séries Ajoutés</h2>
+
+    <div class="tabs">
+        <button class="tab-button active" data-filter="all">Tous</button>
+        <button class="tab-button" data-filter="film">Films</button>
+        <button class="tab-button" data-filter="serie">Séries</button>
+    </div>
+
     <?php foreach (["à voir", "en cours", "vu"] as $statut): ?>
         <h3><?= ucfirst($statut) ?></h3>
-        <div class="catalogue-grid">
+        <div class="catalogue-grid" data-statut="<?= $statut ?>">
             <?php if (!empty($films_par_statut[$statut])): ?>
                 <?php foreach ($films_par_statut[$statut] as $film): ?>
-                    <div class="catalogue-item" data-id="<?= $film['id_tmdb'] ?>">
-                        <img src="<?= htmlspecialchars($film['poster']) ?>" alt="<?= htmlspecialchars($film['titre']) ?>">
+                    <div class="catalogue-item" data-id="<?= $film['id_tmdb'] ?>" data-type="<?= $film['type_oeuvre'] ?>">
+                        <div class="poster-container">
+                            <button class="delete-btn" data-id="<?= $film['id_tmdb'] ?>">✖</button>
+                            <img src="<?= htmlspecialchars($film['poster']) ?>" alt="<?= htmlspecialchars($film['titre']) ?>">
+                        </div>
                         <h3><?= htmlspecialchars($film['titre']) ?></h3>
                         <label>Statut :</label>
                         <select class="styled-select update-field" data-field="statut">
@@ -206,6 +270,55 @@ foreach ($films as $film) {
         });
     });
 
+    document.addEventListener("DOMContentLoaded", function () {
+        const buttons = document.querySelectorAll(".tab-button");
+        const items = document.querySelectorAll(".catalogue-item");
+
+        buttons.forEach(button => {
+            button.addEventListener("click", function () {
+                const filter = this.getAttribute("data-filter");
+
+                buttons.forEach(btn => btn.classList.remove("active"));
+                this.classList.add("active");
+
+                items.forEach(item => {
+                    if (filter === "all" || item.getAttribute("data-type") === filter) {
+                        item.style.display = "block";
+                    } else {
+                        item.style.display = "none";
+                    }
+                });
+            });
+        });
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".delete-btn").forEach(button => {
+            button.addEventListener("click", function (event) {
+                event.stopPropagation(); // Empêche d'autres événements sur l'élément
+                if (!confirm("Voulez-vous vraiment supprimer cet élément ?")) return;
+
+                let filmId = this.dataset.id;
+                let filmElement = this.closest(".catalogue-item");
+
+                fetch("supprimer_catalogue.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: `id_tmdb=${filmId}`
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            filmElement.remove();
+                            console.log("Suppression réussie !");
+                        } else {
+                            console.error("Erreur SQL:", data.error);
+                        }
+                    })
+                    .catch(error => console.error("Erreur AJAX:", error));
+            });
+        });
+    });
 </script>
 
 <footer>

@@ -7,6 +7,7 @@ DROP TABLE IF EXISTS AvisEpisodes;
 DROP TABLE IF EXISTS Catalogue;
 DROP TABLE IF EXISTS FilmsSeries;
 DROP TABLE IF EXISTS Utilisateurs;
+DROP TABLE IF EXISTS Genres;
 
 CREATE TABLE IF NOT EXISTS FilmsSeries (
     id_tmdb INT PRIMARY KEY,  -- ID unique de TMDb (film_id ou tv_id)

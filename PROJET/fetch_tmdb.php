@@ -1,48 +1,56 @@
 <?php
-// Inclure la connexion à la base de données
 require_once('db_connection.php');
-
-// Clé d'API TMDb
 $api_key = 'f751208ae91021f307bb02f72b63586b';
 
-// URL de l'API pour récupérer les films populaires
-$api_url_films = 'https://api.themoviedb.org/3/movie/popular?api_key=' . $api_key . '&language=fr-FR&page=1';
-// URL de l'API pour récupérer les séries populaires
-$api_url_series = 'https://api.themoviedb.org/3/tv/popular?api_key=' . $api_key . '&language=fr-FR&page=1';
+function get_genres($api_key) {
+    $api_url_genres = 'https://api.themoviedb.org/3/genre/movie/list?api_key=' . $api_key . '&language=fr-FR';
+    $response = file_get_contents($api_url_genres);
+    if ($response === FALSE) {
+        die('Erreur lors de la récupération des genres.');
+    }
+    $data = json_decode($response, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        die('Erreur lors du décodage JSON : ' . json_last_error_msg());
+    }
+    return $data['genres'];
+}
 
-// Fonction pour récupérer et insérer les films ou séries
-function fetch_and_insert($api_url, $type_oeuvre) {
+$genres_list = get_genres($api_key);
+$genres_map = [];
+
+// Insertion des genres dans la table Genres
+foreach ($genres_list as $genre) {
+    $genres_map[$genre['id']] = $genre['name'];
+    $query = "INSERT INTO Genres (id_genre, nom) VALUES (:id_genre, :nom) ON DUPLICATE KEY UPDATE nom = :nom";
+    $stmt = $pdo->prepare($query);
+    $stmt->bindParam(':id_genre', $genre['id']);
+    $stmt->bindParam(':nom', $genre['name']);
+    if (!$stmt->execute()) {
+        echo 'Erreur lors de l\'insertion du genre : ' . $genre['name'] . '<br>';
+    } else {
+        echo 'Genre inséré : ' . $genre['name'] . '<br>';
+    }
+}
+
+function fetch_and_insert($api_url, $type_oeuvre, $genres_map) {
     global $pdo;
-
-    // Initialiser cURL
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $api_url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-    // Exécuter la requête
     $response = curl_exec($ch);
-
-    // Vérifier les erreurs de cURL
     if (curl_errno($ch)) {
-        echo 'Erreur cURL : ' . curl_error($ch);
-        exit;
+        die('Erreur cURL : ' . curl_error($ch));
     }
-
-    // Vérifier le code HTTP
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     if ($http_code != 200) {
-        echo "Erreur lors de la récupération des œuvres (Code HTTP: $http_code)";
-        exit;
+        die("Erreur lors de la récupération des œuvres (Code HTTP: $http_code)");
     }
-
     curl_close($ch);
-
-    // Décoder la réponse JSON
     $data = json_decode($response, true);
-
-    // Vérifier si des résultats ont été retournés
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        die('Erreur lors du décodage JSON : ' . json_last_error_msg());
+    }
     if (isset($data['results']) && count($data['results']) > 0) {
-        // Parcourir chaque film ou série
         foreach ($data['results'] as $oeuvre) {
             $id_tmdb = $oeuvre['id'];
             $titre = isset($oeuvre['title']) ? $oeuvre['title'] : (isset($oeuvre['name']) ? $oeuvre['name'] : 'Inconnu');
@@ -50,14 +58,17 @@ function fetch_and_insert($api_url, $type_oeuvre) {
             $poster = isset($oeuvre['poster_path']) ? $oeuvre['poster_path'] : 'default.jpg';
             $description = isset($oeuvre['overview']) ? $oeuvre['overview'] : 'Aucune description disponible';
             $popularite = isset($oeuvre['popularity']) ? $oeuvre['popularity'] : 0;
-            $genres = isset($oeuvre['genre_ids']) ? implode(',', $oeuvre['genre_ids']) : ''; // Récupérer les genres des films/séries
-
-            // Insérer les données dans la table FilmsSeries
+            $genre_ids = isset($oeuvre['genre_ids']) ? $oeuvre['genre_ids'] : [];
+            $genres = [];
+            foreach ($genre_ids as $genre_id) {
+                if (isset($genres_map[$genre_id])) {
+                    $genres[] = $genres_map[$genre_id];
+                }
+            }
+            $genres_str = implode(', ', $genres);
             $query = "INSERT INTO FilmsSeries (id_tmdb, titre, type_oeuvre, annee_sortie, poster, description, popularite, genres)
                       VALUES (:id_tmdb, :titre, :type_oeuvre, :annee_sortie, :poster, :description, :popularite, :genres)
-                      ON DUPLICATE KEY UPDATE titre = :titre"; // Empêche les doublons
-
-            // Préparer la requête
+                      ON DUPLICATE KEY UPDATE titre = :titre";
             $stmt = $pdo->prepare($query);
             $stmt->bindParam(':id_tmdb', $id_tmdb);
             $stmt->bindParam(':titre', $titre);
@@ -66,13 +77,11 @@ function fetch_and_insert($api_url, $type_oeuvre) {
             $stmt->bindParam(':poster', $poster);
             $stmt->bindParam(':description', $description);
             $stmt->bindParam(':popularite', $popularite);
-            $stmt->bindParam(':genres', $genres);
-
-            // Exécuter la requête
-            if ($stmt->execute()) {
-                echo "$type_oeuvre inséré : " . $titre . "<br>";
+            $stmt->bindParam(':genres', $genres_str);
+            if (!$stmt->execute()) {
+                echo "Erreur lors de l'insertion du $type_oeuvre : " . $titre . '<br>';
             } else {
-                echo "Erreur lors de l'insertion du $type_oeuvre : " . $titre . "<br>";
+                echo "$type_oeuvre inséré : " . $titre . '<br>';
             }
         }
     } else {
@@ -80,10 +89,10 @@ function fetch_and_insert($api_url, $type_oeuvre) {
     }
 }
 
-// Récupérer les films populaires
-fetch_and_insert($api_url_films, 'film');
+$api_url_films = 'https://api.themoviedb.org/3/movie/popular?api_key=' . $api_key . '&language=fr-FR&page=1';
+$api_url_series = 'https://api.themoviedb.org/3/tv/popular?api_key=' . $api_key . '&language=fr-FR&page=1';
+fetch_and_insert($api_url_films, 'film', $genres_map);
+fetch_and_insert($api_url_series, 'serie', $genres_map);
 
-// Récupérer les séries populaires
-fetch_and_insert($api_url_series, 'serie');
-
+echo "Genres et œuvres insérés avec succès.";
 ?>

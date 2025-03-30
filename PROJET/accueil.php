@@ -149,31 +149,6 @@ foreach ($all_items as $item) {
         </section>
     </main>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            document.querySelectorAll(".add-to-catalogue").forEach(button => {
-                button.addEventListener("click", function () {
-                    let itemId = this.dataset.id;
-
-                    fetch("add_to_catalog.php", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                        body: `id_tmdb=${itemId}`
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                alert("Film/Série ajouté au catalogue !");
-                            } else {
-                                alert("Erreur : " + data.error);
-                            }
-                        })
-                        .catch(error => console.error("Erreur AJAX :", error));
-                });
-            });
-        });
-    </script>
-
     <!-- Pied de page -->
     <footer>
         <p>&copy; 2025 Mon site de films et séries. Tous droits réservés.</p>

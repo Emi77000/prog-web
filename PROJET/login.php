@@ -71,24 +71,15 @@ if (isset($_POST['login'])) {
             $stmt->execute(['email' => $email]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if ($user) {
-                if (password_verify($password, $user['mot_de_passe'])) {
-                    // Connexion réussie
-                    $_SESSION['user_id'] = $user['id_utilisateur'];
-                    $_SESSION['pseudo'] = $user['pseudo'];
-                    session_regenerate_id(true); // Sécurité
+    if ($user && password_verify($password, $user['mot_de_passe'])) {
+        $_SESSION['user_id'] = $user['id_utilisateur'];
+        $_SESSION['pseudo'] = $user['pseudo'];
+        session_regenerate_id(true); // Sécurité
 
-                    header("Location: accueil.php");
-                    exit;
-                } else {
-                    $message = "Mot de passe incorrect.";
-                }
-            } else {
-                $message = "Email ou mot de passe incorrect.";
-            }
-        } catch (PDOException $e) {
-            $message = "Erreur lors de la connexion : " . $e->getMessage();
-        }
+        header("Location: accueil.php");
+        exit;
+    } else {
+        $message = "Email ou mot de passe incorrect.";
     }
 }
 ?>

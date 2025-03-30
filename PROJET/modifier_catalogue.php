@@ -1,44 +1,21 @@
 <?php
-require_once('config.php');
 session_start();
+require_once('db_connection.php');
 
-// Vérifier si l'utilisateur est connecté
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(['success' => false, 'error' => 'Utilisateur non connecté']);
     exit;
 }
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $id_utilisateur = $_SESSION['user_id'];
-    $id_tmdb = $_POST['id_tmdb'] ?? null;
-    $field = $_POST['field'] ?? null;
-    $value = $_POST['value'] ?? null;
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Récupérer les données envoyées par AJAX
+    $id_tmdb = $_POST['id_tmdb'];
+    $field = $_POST['field']; // statut, note ou commentaire
+    $value = $_POST['value'];
 
-    // Vérification des données
-    if (!$id_tmdb || !$field || $value === null) {
-        echo json_encode(['success' => false, 'error' => 'Données invalides']);
+    if (!in_array($field, ['statut', 'note', 'commentaire'])) {
+        echo json_encode(['success' => false, 'error' => 'Champ invalide']);
         exit;
-    }
-
-    // Vérifier que le champ est autorisé
-    $allowed_fields = ['statut', 'note', 'commentaire'];
-    if (!in_array($field, $allowed_fields)) {
-        echo json_encode(['success' => false, 'error' => 'Champ non autorisé']);
-        exit;
-    }
-
-    // Vérification des contraintes
-    if ($field === 'statut' && !in_array($value, ['vu', 'en cours', 'à voir'])) {
-        echo json_encode(['success' => false, 'error' => 'Statut invalide']);
-        exit;
-    }
-
-    if ($field === 'note') {
-        $value = floatval($value);
-        if ($value < 0 || $value > 5) {
-            echo json_encode(['success' => false, 'error' => 'Note invalide']);
-            exit;
-        }
     }
 
     try {
@@ -46,29 +23,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
         ]);
 
-        // Vérifier si l'entrée existe
-        $checkSql = "SELECT COUNT(*) FROM Catalogue WHERE id_utilisateur = :id_utilisateur AND id_tmdb = :id_tmdb";
-        $stmt = $pdo->prepare($checkSql);
-        $stmt->execute([':id_utilisateur' => $id_utilisateur, ':id_tmdb' => $id_tmdb]);
-        $exists = $stmt->fetchColumn();
-
-        if (!$exists) {
-            echo json_encode(['success' => false, 'error' => 'Film/Série non trouvé']);
-            exit;
-        }
-
-        // Mise à jour dynamique
-        $sql = "UPDATE Catalogue SET $field = :value WHERE id_utilisateur = :id_utilisateur AND id_tmdb = :id_tmdb";
+        // Mettre à jour le champ demandé dans la base de données
+        $sql = "UPDATE Catalogue SET $field = :value WHERE id_tmdb = :id_tmdb AND id_utilisateur = :id_utilisateur";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([
             ':value' => $value,
-            ':id_utilisateur' => $id_utilisateur,
-            ':id_tmdb' => $id_tmdb
+            ':id_tmdb' => $id_tmdb,
+            ':id_utilisateur' => $_SESSION['user_id']
         ]);
 
         echo json_encode(['success' => true]);
     } catch (PDOException $e) {
         echo json_encode(['success' => false, 'error' => $e->getMessage()]);
     }
+} else {
+    echo json_encode(['success' => false, 'error' => 'Méthode invalide']);
 }
 ?>

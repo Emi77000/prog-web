@@ -16,21 +16,14 @@ CREATE TABLE IF NOT EXISTS FilmsSeries (
     poster VARCHAR(255),  -- URL de l'affiche du film/série
     description TEXT,
     popularite FLOAT,
+    genres VARCHAR(255),  -- Liste des genres séparés par des virgules (ex: "Action, Aventure, Drame")
     date_ajout DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT IGNORE INTO FilmsSeries (id_tmdb, titre, type_oeuvre, annee_sortie, poster, description, popularite)
-VALUES
-    (535, 'Fight Club', 'film', 1999, 'fightclub.jpg', 'A troubled man seeks the help of a self-help guru, but things take a dark turn.', 8.4),
-    (681, 'The Dark Knight', 'film', 2008, 'thedarkknight.jpg', 'Batman faces off against the Joker, a criminal mastermind who seeks to create chaos in Gotham City.', 8.9),
-    (157336, 'Interstellar', 'film', 2014, 'interstellar.jpg', 'A team of explorers travels through a wormhole in space in an attempt to ensure humanity\'s survival.', 8.6),
-    (500, 'The Shawshank Redemption', 'film', 1994, 'shawshank.jpg', 'Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.', 9.3),
-    (120, 'The Godfather', 'film', 1972, 'godfather.jpg', 'The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.', 9.2),
-    (131, 'Pulp Fiction', 'film', 1994, 'pulpfiction.jpg', 'The lives of two mob hitmen, a boxer, a gangster\'s wife, and a pair of diner bandits intertwine in four tales of violence and redemption.', 8.9),
-    (670, 'Inception', 'film', 2010, 'inception.jpg', 'A thief who enters the dreams of others to steal secrets from their subconscious is given a chance to have his criminal record erased.', 8.8),
-    (337, 'The Matrix', 'film', 1999, 'matrix.jpg', 'A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.', 8.7),
-    (159, 'The Lord of the Rings: The Fellowship of the Ring', 'film', 2001, 'ring.jpg', 'A young hobbit is tasked with carrying the one ring to Mount Doom, accompanied by a fellowship of friends and allies.', 8.8),
-    (11, 'Forrest Gump', 'film', 1994, 'forrest.jpg', 'The presidencies of Kennedy and Johnson, the Vietnam War, the Watergate scandal and other historical events unfold from the perspective of an Alabama man with an extraordinary brain.', 8.8);
+CREATE TABLE IF NOT EXISTS Genres (
+    id_genre INT PRIMARY KEY,
+    nom VARCHAR(255) NOT NULL
+);
 
 
 -- Table Utilisateurs
@@ -42,8 +35,6 @@ CREATE TABLE IF NOT EXISTS Utilisateurs (
     avatar VARCHAR(255),
     date_inscription DATETIME DEFAULT CURRENT_TIMESTAMP
 );
-
-
 
 
 -- Table Catalogue personnel (films et séries suivis par chaque utilisateur)

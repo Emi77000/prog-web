@@ -115,33 +115,27 @@ $all_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="catalogue-grid">
             <?php
             if (count($all_items) > 0) {
-               foreach ($all_items as $item) {
-                   $id_tmdb = $item['id_tmdb'];
-                   $titre = $item['titre'];
-                   $type_oeuvre = $item['type_oeuvre'];
-                   $annee_sortie = $item['annee_sortie'];
-                   $poster_url = $item['poster'] ?: 'path/to/default_image.jpg';
-                   $description = $item['description'];
-                   $popularite = $item['popularite'];
+                foreach ($all_items as $item) {
+                    $poster_url = $item['poster'] ?: 'path/to/default_image.jpg';
 
-                   // Récupérer les genres depuis la base de données
-                   $genres_list = explode(',', $item['genres']);
-                   $genres_names = [];
-                   foreach ($genres_list as $genre_id) {
-                       $genre_name = get_genre_name_by_id(trim($genre_id));
-                       $genres_names[] = $genre_name;
-                   }
-                   $genres = implode(', ', $genres_names);
+                    // Récupérer les genres depuis la base de données
+                    $genres_list = explode(',', $item['genres']); // Convertir en tableau
+                    $genres_names = [];
+                    foreach ($genres_list as $genre_id) {
+                        $genre_name = get_genre_name_by_id(trim($genre_id));
+                        $genres_names[] = $genre_name;
+                    }
+                    $genres = implode(', ', $genres_names);
 
-                   echo '<div class="catalogue-item">';
-                   echo '<img src="' . htmlspecialchars($poster_url) . '" alt="Affiche de ' . htmlspecialchars($titre) . '">';
-                   echo '<h3>' . htmlspecialchars($titre) . '</h3>';
-                   echo '<p>Genres : ' . htmlspecialchars($genres) . '</p>';
-                   echo '<p>' . ($annee_sortie ?? 'N/A') . '</p>';
-                   echo '<p>' . htmlspecialchars($description) . '</p>';
-                   echo '<p>Popularité : ' . $popularite . '</p>';
-                   echo '<button class="add_to_catalog" data-id="' . $id_tmdb . '">Ajouter au catalogue</button>';
-                   echo '</div>';
+                    echo '<div class="catalogue-item">';
+                    echo '<img src="' . htmlspecialchars($poster_url) . '" alt="Affiche de ' . htmlspecialchars($titre) . '">';
+                    echo '<h3>' . htmlspecialchars($titre) . '</h3>';
+                    echo '<p>Genres : ' . htmlspecialchars($genres) . '</p>';
+                    echo '<p>' . ($annee_sortie ?? 'N/A') . '</p>';
+                    echo '<p>' . htmlspecialchars($description) . '</p>';
+                    echo '<p>Popularité : ' . $popularite . '</p>';
+                    echo '<button class="add-to-catalogue" data-id="' . $id_tmdb . '">Ajouter au catalogue</button>';
+                    echo '</div>';
                 }
             } else {
                 echo '<p>Aucun film ou série trouvé.</p>';
@@ -151,7 +145,6 @@ $all_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </section>
 </main>
 
-<script src="add_to_catalog.js"></script>
 <!-- Pied de page -->
 <footer>
     <p>&copy; 2025 Mon site de films et séries. Tous droits réservés.</p>

@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     // Sélectionner tous les boutons "Ajouter au catalogue"
-    const buttons = document.querySelectorAll('.add_to_catalog');
+    const buttons = document.querySelectorAll('.ajouter-catalogue');
 
     buttons.forEach(button => {
         button.addEventListener('click', function () {
@@ -22,18 +22,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 method: 'POST',
                 body: formData
             })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert(data.success);
-                    } else {
-                        alert(data.error);
-                    }
-                })
-                .catch(error => {
-                    alert('Une erreur est survenue lors de l\'ajout du film.');
-                    console.error(error);
-                });
+            .then(response => response.json())
+            .then(data => {
+                // Traiter la réponse du serveur
+                if (data.success) {
+                    alert(data.success);  // Afficher le message de succès
+                } else {
+                    alert(data.error);  // Afficher l'erreur si le film n'a pas été ajouté
+                }
+            })
+            .catch(error => {
+                alert('Une erreur est survenue lors de l\'ajout du film.');
+                console.error(error);
+            });
         });
     });
 });

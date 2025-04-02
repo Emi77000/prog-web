@@ -9,74 +9,71 @@ DROP TABLE IF EXISTS FilmsSeries;
 DROP TABLE IF EXISTS Utilisateurs;
 DROP TABLE IF EXISTS Genres;
 
-CREATE TABLE IF NOT EXISTS FilmsSeries (
-    id_tmdb INT PRIMARY KEY,  -- ID unique de TMDb (film_id ou tv_id)
-    titre VARCHAR(255) NOT NULL,
-    type_oeuvre ENUM('film', 'serie') NOT NULL,
-    annee_sortie INT,
-    poster VARCHAR(255),  -- URL de l'affiche du film/série
-    description TEXT,
-    popularite FLOAT,
-    genres VARCHAR(255),  -- Liste des genres séparés par des virgules (ex: "Action, Aventure, Drame")
-    date_ajout DATETIME DEFAULT CURRENT_TIMESTAMP
+
+-- Table des utilisateurs
+CREATE TABLE utilisateur (
+                             id_utilisateur INT AUTO_INCREMENT PRIMARY KEY,
+                             pseudo VARCHAR(50) NOT NULL UNIQUE,
+                             email VARCHAR(100) NOT NULL UNIQUE,
+                             mot_de_passe VARCHAR(255) NOT NULL,
+                             date_inscription DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS Genres (
-    id_genre INT PRIMARY KEY,
-    nom VARCHAR(255) NOT NULL
+-- Table des œuvres (films et séries)
+CREATE TABLE oeuvre (
+                        id_oeuvre INT PRIMARY KEY, -- ID de TMDB
+                        titre VARCHAR(255) NOT NULL,
+                        type varchar(10) NOT NULL,
+                        annee_sortie YEAR,
+                        genre VARCHAR(100),
+                        affiche VARCHAR(255),
+                        resume TEXT
 );
 
-
--- Table Utilisateurs
-CREATE TABLE IF NOT EXISTS Utilisateurs (
-    id_utilisateur INT AUTO_INCREMENT PRIMARY KEY,
-    pseudo VARCHAR(50) NOT NULL UNIQUE,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    mot_de_passe VARCHAR(255) NOT NULL,
-    avatar VARCHAR(255),
-    date_inscription DATETIME DEFAULT CURRENT_TIMESTAMP
+-- Table du catalogue personnel de chaque utilisateur
+CREATE TABLE catalogue_utilisateur (
+                                       id_catalogue INT AUTO_INCREMENT PRIMARY KEY,
+                                       id_utilisateur INT NOT NULL,
+                                       id_oeuvre INT NOT NULL,
+                                       statut ENUM('vu','en cours', 'à voir') DEFAULT 'à voir',
+                                       note INT, -- sur 5
+                                       commentaire TEXT,
+                                       date_ajout DATETIME DEFAULT CURRENT_TIMESTAMP,
+                                       type varchar(10) NOT NULL,
+                                       FOREIGN KEY (id_utilisateur) REFERENCES utilisateur(id_utilisateur) ON DELETE CASCADE,
+                                       UNIQUE KEY  (id_utilisateur, id_oeuvre)
 );
 
-
--- Table Catalogue personnel (films et séries suivis par chaque utilisateur)
-CREATE TABLE IF NOT EXISTS Catalogue (
-    id_catalogue INT AUTO_INCREMENT PRIMARY KEY,
-    id_utilisateur INT NOT NULL,
-    id_tmdb INT NOT NULL,  -- Lié à FilmsSeries
-    statut ENUM('vu','en cours','à voir') NOT NULL DEFAULT 'à voir',
-    date_ajout DATETIME DEFAULT CURRENT_TIMESTAMP,
-    note FLOAT CHECK (note >= 0 AND note <= 5),
-    commentaire TEXT,
-    FOREIGN KEY (id_utilisateur) REFERENCES Utilisateurs(id_utilisateur) ON DELETE CASCADE,
-    FOREIGN KEY (id_tmdb) REFERENCES FilmsSeries(id_tmdb) ON DELETE CASCADE,
-    UNIQUE KEY (id_utilisateur, id_tmdb)  -- Un utilisateur ne peut ajouter un même film/série qu'une fois
+-- Table des saisons (pour les séries)
+CREATE TABLE saison (
+                        id_saison INT AUTO_INCREMENT PRIMARY KEY,
+                        id_oeuvre INT NOT NULL,
+                        numero_saison INT NOT NULL,
+                        titre_saison VARCHAR(255),
+                        nb_episodes INT,
+                        date YEAR,
+                        FOREIGN KEY (id_oeuvre) REFERENCES oeuvre(id_oeuvre) ON DELETE CASCADE
 );
 
-
--- Table SuiviEpisodes (permet de cocher les épisodes vus pour les séries)
-CREATE TABLE IF NOT EXISTS SuiviEpisodes (
-    id_suivi INT AUTO_INCREMENT PRIMARY KEY,
-    id_utilisateur INT NOT NULL,
-    id_externe INT NOT NULL,  -- Identifiant TMDb de la série (tv_id)
-    saison INT NOT NULL,
-    episode INT NOT NULL,
-    vu BOOLEAN DEFAULT FALSE,  -- Episode vu ou non
-    date_mise_a_jour DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT fk_suivi_episodes_utilisateur FOREIGN KEY (id_utilisateur) REFERENCES Utilisateurs(id_utilisateur) ON DELETE CASCADE,
-    UNIQUE KEY (id_utilisateur, id_externe, saison, episode)  -- Empêche les doublons pour un même épisode suivi
+-- Table des épisodes
+CREATE TABLE episode (
+                         id_episode INT AUTO_INCREMENT PRIMARY KEY,
+                         id_saison INT NOT NULL,
+                         numero_episode INT NOT NULL,
+                         titre_episode VARCHAR(255),
+                         resume TEXT,
+                         date_diffusion DATE,
+                         FOREIGN KEY (id_saison) REFERENCES saison(id_saison) ON DELETE CASCADE
 );
 
-
-
-CREATE TABLE IF NOT EXISTS AvisEpisodes (
-    id_avis INT AUTO_INCREMENT PRIMARY KEY,
-    id_utilisateur INT NOT NULL,
-    id_externe INT NOT NULL,  -- ID TMDb de la série (tv_id)
-    saison INT NOT NULL,
-    episode INT NOT NULL,
-    note FLOAT CHECK (note >= 0 AND note <= 5),  -- Note de 0 à 5 étoiles
-    commentaire TEXT,  -- Commentaire optionnel
-    date_avis DATETIME DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_avis_episodes_utilisateur FOREIGN KEY (id_utilisateur) REFERENCES Utilisateurs(id_utilisateur) ON DELETE CASCADE,
-    UNIQUE KEY (id_utilisateur, id_externe, saison, episode)  -- Un seul avis par utilisateur/épisode
+-- Suivi des épisodes vus par utilisateur
+CREATE TABLE suivi_episode (
+                               id_suivi INT AUTO_INCREMENT PRIMARY KEY,
+                               id_utilisateur INT NOT NULL,
+                               id_episode INT NOT NULL,
+                               vu BOOLEAN DEFAULT FALSE,
+                               date_vue DATETIME,
+                               FOREIGN KEY (id_utilisateur) REFERENCES utilisateur(id_utilisateur) ON DELETE CASCADE,
+                               FOREIGN KEY (id_episode) REFERENCES episode(id_episode) ON DELETE CASCADE
 );
+

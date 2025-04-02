@@ -2,15 +2,14 @@
 session_start();
 require_once('db_connection.php');
 
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['id_utilisateur'])) {
     echo json_encode(['success' => false, 'error' => 'Utilisateur non connecté']);
     exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Récupérer les données envoyées par AJAX
-    $id_tmdb = $_POST['id_tmdb'];
-    $field = $_POST['field']; // statut, note ou commentaire
+    $id_oeuvre = $_POST['id_oeuvre']; // ⬅️ Nouveau nom correct
+    $field = $_POST['field']; // 'statut', 'note', 'commentaire'
     $value = $_POST['value'];
 
     if (!in_array($field, ['statut', 'note', 'commentaire'])) {
@@ -23,13 +22,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
         ]);
 
-        // Mettre à jour le champ demandé dans la base de données
-        $sql = "UPDATE Catalogue SET $field = :value WHERE id_tmdb = :id_tmdb AND id_utilisateur = :id_utilisateur";
+        // Sécurité : empêcher injection SQL dans le nom du champ
+        $allowed_fields = ['statut', 'note', 'commentaire'];
+        if (!in_array($field, $allowed_fields)) {
+            throw new Exception("Champ interdit.");
+        }
+
+        // Construire la requête dynamiquement (champ sécurisé)
+        $sql = "UPDATE catalogue_utilisateur SET $field = :value WHERE id_oeuvre = :id_oeuvre AND id_utilisateur = :id_utilisateur";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([
             ':value' => $value,
-            ':id_tmdb' => $id_tmdb,
-            ':id_utilisateur' => $_SESSION['user_id']
+            ':id_oeuvre' => $id_oeuvre,
+            ':id_utilisateur' => $_SESSION['id_utilisateur']
         ]);
 
         echo json_encode(['success' => true]);
@@ -39,4 +44,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 } else {
     echo json_encode(['success' => false, 'error' => 'Méthode invalide']);
 }
-?>

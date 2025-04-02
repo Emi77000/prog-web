@@ -3,12 +3,12 @@ include 'config.php';
 
 // Fonction pour enregistrer un utilisateur
 function registerUser($pseudo, $email, $mot_de_passe) {
-    global $conn;
+    global $pdo;
 
     // Hachage du mot de passe
     $hashed_password = password_hash($mot_de_passe, PASSWORD_DEFAULT);
 
-    $stmt = $conn->prepare("INSERT INTO Utilisateurs (pseudo, email, mot_de_passe) VALUES (?, ?, ?)");
+    $stmt = $pdo->prepare("INSERT INTO Utilisateurs (pseudo, email, mot_de_passe) VALUES (?, ?, ?)");
     $stmt->bind_param("sss", $pseudo, $email, $hashed_password);
     $stmt->execute();
     $stmt->close();
@@ -16,9 +16,9 @@ function registerUser($pseudo, $email, $mot_de_passe) {
 
 // Fonction pour connecter un utilisateur
 function loginUser($email, $mot_de_passe) {
-    global $conn;
+    global $pdo;
 
-    $stmt = $conn->prepare("SELECT id_utilisateur, mot_de_passe FROM Utilisateurs WHERE email = ?");
+    $stmt = $pdo->prepare("SELECT id_utilisateur, mot_de_passe FROM Utilisateurs WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $stmt->store_result();
@@ -47,16 +47,16 @@ function getDetailsFromAPI($id_tmdb, $type = 'movie') {
 
 // Fonction pour ajouter un film/série dans le catalogue de l'utilisateur
 function addToCatalogue($id_utilisateur, $id_tmdb, $statut, $note, $commentaire) {
-    global $conn;
+    global $pdo;
 
     // Vérifier si le film/série est déjà dans le catalogue
-    $stmt = $conn->prepare("SELECT * FROM Catalogue WHERE id_utilisateur = ? AND id_tmdb = ?");
+    $stmt = $pdo->prepare("SELECT * FROM Catalogue WHERE id_utilisateur = ? AND id_tmdb = ?");
     $stmt->bind_param("ii", $id_utilisateur, $id_tmdb);
     $stmt->execute();
     $stmt->store_result();
 
     if ($stmt->num_rows == 0) {
-        $stmt = $conn->prepare("INSERT INTO Catalogue (id_utilisateur, id_tmdb, statut, note, commentaire) VALUES (?, ?, ?, ?, ?)");
+        $stmt = $pdo->prepare("INSERT INTO Catalogue (id_utilisateur, id_tmdb, statut, note, commentaire) VALUES (?, ?, ?, ?, ?)");
         $stmt->bind_param("iisds", $id_utilisateur, $id_tmdb, $statut, $note, $commentaire);
         $stmt->execute();
         $stmt->close();

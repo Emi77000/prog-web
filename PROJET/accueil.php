@@ -1,180 +1,176 @@
 <?php
-// Inclure la connexion à la base de données
-require_once('db_connection.php');
 session_start();
+require_once 'db_connection.php';
 
-// Vérifier si l'utilisateur est connecté
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+if (!isset($_SESSION['id_utilisateur'])) {
+    header('Location: login.php');
     exit;
 }
 
-$pseudo = $_SESSION['pseudo'];
-$user_id = $_SESSION['user_id'];
+function fetchTMDB($endpoint, $params = [])
+{
+    $apiKey = 'f751208ae91021f307bb02f72b63586b'; // Remplace par ta vraie clé
+    $url = "https://api.themoviedb.org/3/$endpoint";
+    $params['api_key'] = $apiKey;
+    $params['language'] = 'fr-FR';
+    $url .= '?' . http_build_query($params);
 
-// Clé d'API TMDb
-$api_key = 'f751208ae91021f307bb02f72b63586b';
+    $response = @file_get_contents($url);
+    return json_decode($response, true);
+}
 
-// Nombre de films et séries à afficher
-$films_par_page = 50;
+$type = $_GET['type'] ?? 'all'; // 'movie', 'tv', ou 'all'
 
-// Fonction pour récupérer les données TMDb
-function fetch_tmdb_data($url_base, $api_key, $films_par_page) {
-    $results = [];
-    for ($page = 1; $page <= ceil($films_par_page / 20); $page++) {
-        $api_url = $url_base . "?api_key=$api_key&language=fr-FR&page=$page";
-        $response = file_get_contents($api_url);
+$genres = [];
+if ($type === 'tv') {
+    $genres = fetchTMDB("genre/tv/list")['genres'] ?? [];
+} elseif ($type === 'movie') {
+    $genres = fetchTMDB("genre/movie/list")['genres'] ?? [];
+} else {
+    $genres = array_merge(
+        fetchTMDB("genre/movie/list")['genres'] ?? [],
+        fetchTMDB("genre/tv/list")['genres'] ?? []
+    );
+}
 
-        if ($response) {
-            $data = json_decode($response, true);
-            if (isset($data['results'])) {
-                $results = array_merge($results, $data['results']);
-            }
+$sections = [];
+foreach ($genres as $genre) {
+    $id = $genre['id'];
+    $name = $genre['name'];
+
+    $items = [];
+    if ($type === 'tv') {
+        $items = fetchTMDB("discover/tv", ['with_genres' => $id])['results'] ?? [];
+    } elseif ($type === 'movie') {
+        $items = fetchTMDB("discover/movie", ['with_genres' => $id])['results'] ?? [];
+    } else {
+        $tvItems = fetchTMDB("discover/tv", ['with_genres' => $id])['results'] ?? [];
+        $movieItems = fetchTMDB("discover/movie", ['with_genres' => $id])['results'] ?? [];
+
+        // Ajouter type explicitement si mélange
+        foreach ($tvItems as &$tv) {
+            $tv['media_type'] = 'tv';
         }
+        foreach ($movieItems as &$movie) {
+            $movie['media_type'] = 'movie';
+        }
+
+        $items = array_merge($movieItems, $tvItems);
     }
-    return $results;
+
+    if (!empty($items)) {
+        $sections[] = [
+            'genre' => $name,
+            'items' => $items
+        ];
+    }
 }
-
-// Récupération des films et séries depuis l'API
-$films = fetch_tmdb_data('https://api.themoviedb.org/3/movie/popular', $api_key, $films_par_page);
-$series = fetch_tmdb_data('https://api.themoviedb.org/3/tv/popular', $api_key, $films_par_page);
-
-// Fusion des films et séries
-$all_items = array_merge($films, $series);
-
-// Insertion dans la base de données
-foreach ($all_items as $item) {
-    $id_tmdb = $item['id'];
-    $titre = $item['title'] ?? $item['name'];
-    $type_oeuvre = isset($item['title']) ? 'film' : 'serie';
-    $annee_sortie = isset($item['release_date']) ? substr($item['release_date'], 0, 4) :
-        (isset($item['first_air_date']) ? substr($item['first_air_date'], 0, 4) : null);
-    $poster_url = isset($item['poster_path']) ? 'https://image.tmdb.org/t/p/w500' . $item['poster_path'] : null;
-    $description = $item['overview'] ?? '';
-    $popularite = $item['popularity'] ?? 0;
-    $genres = isset($item['genre_ids']) ? implode(',', $item['genre_ids']) : '';
-
-    // Requête SQL avec mise à jour en cas de doublon
-    $query = "INSERT INTO FilmsSeries (id_tmdb, titre, type_oeuvre, annee_sortie, poster, description, popularite, genres)
-              VALUES (:id_tmdb, :titre, :type_oeuvre, :annee_sortie, :poster, :description, :popularite, :genres)
-              ON DUPLICATE KEY UPDATE 
-              titre = VALUES(titre), 
-              annee_sortie = VALUES(annee_sortie), 
-              poster = VALUES(poster), 
-              description = VALUES(description), 
-              popularite = VALUES(popularite), 
-              genres = VALUES(genres)";
-
-    $stmt = $pdo->prepare($query);
-    $stmt->execute([
-        ':id_tmdb' => $id_tmdb,
-        ':titre' => $titre,
-        ':type_oeuvre' => $type_oeuvre,
-        ':annee_sortie' => $annee_sortie,
-        ':poster' => $poster_url,
-        ':description' => $description,
-        ':popularite' => $popularite,
-        ':genres' => $genres
-    ]);
-}
-
-// Récupération des films et séries stockés en base
-$query = "SELECT * FROM FilmsSeries ORDER BY popularite DESC";
-$stmt = $pdo->query($query);
-$all_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
 ?>
 
-    <!DOCTYPE html>
-    <html lang="fr">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Accueil - Films et Séries</title>
-        <link rel="stylesheet" href="styles.css"> <!-- Lien vers ton fichier CSS -->
-    </head>
-    <body>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Accueil - Mon Catalogue</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .filter {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .filter a {
+            margin: 0 10px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            padding: 10px 20px;
+            background-color: #e50914;
+            border-radius: 5px;
+        }
+        .carrousel {
+            margin: 30px 0;
+        }
+        .carrousel h2 {
+            margin-left: 20px;
+            font-size: 1.5em;
+        }
+        .carrousel-items {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            padding: 10px 20px;
+        }
+        .carrousel-item {
+            flex: 0 0 auto;
+            width: 180px;
+            margin-right: 15px;
+            scroll-snap-align: start;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .carrousel-item img {
+            width: 100%;
+            height: 270px;
+            object-fit: cover;
+        }
+        .carrousel-item h3 {
+            font-size: 1em;
+            margin: 10px;
+            color: white;
+            text-align: center;
+        }
+        .carrousel-item a {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+        }
+    </style>
+</head>
+<body>
+<header class="header">
+    <div class="logo"><a href="accueil.php">Mon Catalogue</a></div>
+    <nav>
+        <ul>
+            <li><a href="catalogPerso.php">Mon Catalogue</a></li>
+            <li><a href="suiviSerie.php">Suivi séries </a></li>
+            <li><a href="logout.php">Déconnexion</a></li>
+        </ul>
+    </nav>
+</header>
 
-    <!-- En-tête de ton site -->
-    <header>
-        <h1>Bienvenue sur notre site de Films et Séries</h1>
-        <nav>
-            <ul>
-                <li><a href="index.php">Accueil</a></li>
-                <li><a href="films.php">Films</a></li>
-                <li><a href="catalogPerso.php">Catalogue</a></li>
-                <li><a href="logout.php">Déconnexion</a></li>
-            </ul>
-        </nav>
-    </header>
+<main>
+    <div class="filter">
+        <a href="accueil.php?type=all">Tout</a>
+        <a href="accueil.php?type=movie">Films</a>
+        <a href="accueil.php?type=tv">Séries</a>
+    </div>
 
-    <!-- Section principale : Grille de films et séries -->
-    <main>
-        <section class="catalogue">
-            <h2>Films et Séries populaires</h2>
-            <div class="catalogue-grid">
-                <?php
-                if (count($all_items) > 0) {
-                    foreach ($all_items as $item) {
-                        $id_tmdb = $item['id_tmdb'];
-                        $titre = $item['titre'];
-                        $type_oeuvre = $item['type_oeuvre'];
-                        $annee_sortie = $item['annee_sortie'];
-                        $poster_url = $item['poster'] ?: 'path/to/default_image.jpg';
-                        $description = $item['description'];
-                        $popularite = $item['popularite'];
-
-                        // Récupérer les genres depuis la base de données
-                        $genres_list = explode(',', $item['genres']);
-                        $genres_names = [];
-                        foreach ($genres_list as $genre_id) {
-                            $genre_name = get_genre_name_by_id(trim($genre_id));
-                            $genres_names[] = $genre_name;
-                        }
-                        $genres = implode(', ', $genres_names);
-
-                        echo '<div class="catalogue-item">';
-                        echo '<img src="' . htmlspecialchars($poster_url) . '" alt="Affiche de ' . htmlspecialchars($titre) . '">';
-                        echo '<h3>' . htmlspecialchars($titre) . '</h3>';
-                        echo '<p>Genres : ' . htmlspecialchars($genres) . '</p>';
-                        echo '<p>' . ($annee_sortie ?? 'N/A') . '</p>';
-                        echo '<p>' . htmlspecialchars($description) . '</p>';
-                        echo '<p>Popularité : ' . $popularite . '</p>';
-                        echo '<button class="add_to_catalog" data-id="' . $id_tmdb . '">Ajouter au catalogue</button>';
-                        echo '</div>';
-                    }
-                } else {
-                    echo '<p>Aucun film ou série trouvé.</p>';
-                }
-                ?>
+    <?php foreach ($sections as $section): ?>
+        <div class="carrousel">
+            <h2><?= htmlspecialchars($section['genre']) ?></h2>
+            <div class="carrousel-items">
+                <?php foreach ($section['items'] as $item):
+                    $titre = isset($item['title']) ? $item['title'] : (isset($item['name']) ? $item['name'] : 'Titre inconnu');
+                    $poster = $item['poster_path'] ? 'https://image.tmdb.org/t/p/w300' . $item['poster_path'] : '';
+                    $mediaType = $item['media_type'] ?? ($type === 'movie' ? 'movie' : 'tv');
+                    ?>
+                    <div class="carrousel-item">
+                        <a href="details.php?id=<?= $item['id'] ?>&type=<?= $mediaType ?>">
+                            <?php if ($poster): ?>
+                                <img src="<?= htmlspecialchars($poster) ?>" alt="<?= htmlspecialchars($titre) ?>">
+                            <?php endif; ?>
+                            <h3><?= htmlspecialchars($titre) ?></h3>
+                        </a>
+                    </div>
+                <?php endforeach; ?>
             </div>
-        </section>
-    </main>
+        </div>
+    <?php endforeach; ?>
+</main>
 
-    <script src="add_to_catalog.js"></script>
-    <!-- Pied de page -->
-    <footer>
-        <p>&copy; 2025 Mon site de films et séries. Tous droits réservés.</p>
-    </footer>
-
-    </body>
-    </html>
-
-<?php
-// Fonction pour récupérer le nom du genre par son ID
-function get_genre_name_by_id($genre_id) {
-    global $pdo;
-
-    if (empty($genre_id)) {
-        return 'Inconnu';
-    }
-
-    $query = "SELECT nom FROM genres WHERE id_genre = :genre_id";
-    $stmt = $pdo->prepare($query);
-    $stmt->bindParam(':genre_id', $genre_id);
-    $stmt->execute();
-
-    $result = $stmt->fetch(PDO::FETCH_ASSOC);
-    return $result ? $result['nom'] : 'Inconnu';
-}
-?>
+<footer>
+    <p>&copy; <?= date('Y') ?> Mon Catalogue</p>
+</footer>
+</body>
+</html>

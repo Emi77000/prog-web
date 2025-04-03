@@ -1,40 +1,40 @@
 <?php
-session_start();
-require_once 'db_connection.php';
+require_once 'fetch_tmdb.php';
 
-if (!isset($_GET['id']) || !isset($_GET['type'])) {
+$id = $_GET['id'] ?? null;
+$type = $_GET['type'] ?? null;
+
+if (!$id || !$type) {
     echo "Paramètres manquants.";
     exit;
 }
 
-$id_tmdb = $_GET['id'];
-$type = $_GET['type']; // 'movie' ou 'tv'
+$details = getDetailsTMDB($id, $type);
 
-function fetchTMDB($endpoint, $params = [])
-{
-    $apiKey = 'f751208ae91021f307bb02f72b63586b'; // Remplace par ta vraie clé
-    $url = "https://api.themoviedb.org/3/$endpoint";
-    $params['api_key'] = $apiKey;
-    $params['language'] = 'fr-FR';
-    $url .= '?' . http_build_query($params);
-
-    $response = @file_get_contents($url);
-    return json_decode($response, true);
-}
-
-$details = fetchTMDB("$type/$id_tmdb");
-
-if (empty($details)) {
-    echo "Erreur lors de la récupération des détails.";
+if (!$details) {
+    echo "Aucune information trouvée.";
     exit;
 }
 
-$title = $details['title'] ?? $details['name'];
-$overview = $details['overview'] ?? 'Aucune description disponible';
-$poster = 'https://image.tmdb.org/t/p/w500' . ($details['poster_path'] ?? '');
-$release_date = $details['release_date'] ?? $details['first_air_date'];
-?>
+// Récupération des infos
+$titre = $details['title'] ?? $details['name'] ?? 'Titre inconnu';
+$description = $details['overview'] ?? 'Aucune description disponible.';
+$affiche = $details['poster_path']
+    ? 'https://image.tmdb.org/t/p/w300' . $details['poster_path']
+    : 'https://via.placeholder.com/300x450?text=Pas+de+visuel';
+$date = $details['release_date'] ?? $details['first_air_date'] ?? 'Date inconnue';
+$genres = array_map(function ($g) {
+    return $g['name'];
+}, $details['genres'] ?? []);
+$duree = $details['runtime'] ?? ($details['episode_run_time'][0] ?? null);
 
+// Pour affichage HTML
+$poster = $affiche;
+$title = $titre;
+$release_date = $date;
+$overview = $description;
+$id_tmdb = $id;
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -47,24 +47,20 @@ $release_date = $details['release_date'] ?? $details['first_air_date'];
             color: white;
             font-family: 'Arial', sans-serif;
         }
-
         .header {
             background-color: #141414;
             padding: 15px 0;
             text-align: center;
         }
-
         .logo a {
             color: white;
             text-decoration: none;
             font-size: 2em;
         }
-
         .back-button {
             text-align: center;
             margin-top: 20px;
         }
-
         .back-button a {
             color: white;
             text-decoration: none;
@@ -73,28 +69,23 @@ $release_date = $details['release_date'] ?? $details['first_air_date'];
             border-radius: 5px;
             font-weight: bold;
         }
-
         .back-button a:hover {
             background-color: #f40612;
         }
-
         .details-container {
             margin-top: 30px;
             text-align: center;
         }
-
         .details-container img {
             width: 300px;
             height: 450px;
             object-fit: cover;
             border-radius: 10px;
         }
-
         .details-container h2 {
             font-size: 2em;
             margin-top: 20px;
         }
-
         .details-container p {
             font-size: 1.1em;
             color: #ccc;
@@ -102,7 +93,6 @@ $release_date = $details['release_date'] ?? $details['first_air_date'];
             width: 60%;
             margin: 0 auto;
         }
-
         .add-to-catalog {
             margin-top: 20px;
             padding: 10px 20px;
@@ -111,8 +101,9 @@ $release_date = $details['release_date'] ?? $details['first_air_date'];
             border-radius: 5px;
             font-weight: bold;
             text-decoration: none;
+            border: none;
+            cursor: pointer;
         }
-
         .add-to-catalog:hover {
             background-color: #f40612;
         }
@@ -130,8 +121,10 @@ $release_date = $details['release_date'] ?? $details['first_air_date'];
     <p><strong>Date de sortie : </strong><?= htmlspecialchars($release_date) ?></p>
     <p><?= htmlspecialchars($overview) ?></p>
 
-    <!-- Ajout du bouton Ajouter au catalogue -->
-    <button class="add_to_catalog" data-id="<?= $id_tmdb ?>" data-type="<?= $type ?>">Ajouter au catalogue</button>
+    <!-- Bouton d'ajout au catalogue -->
+    <button class="add-to-catalog" data-id="<?= htmlspecialchars($id_tmdb) ?>" data-type="<?= htmlspecialchars($type) ?>">
+        Ajouter au catalogue
+    </button>
 
     <div class="back-button">
         <a href="accueil.php?type=<?= htmlspecialchars($type) ?>">Retour à l'accueil</a>

@@ -1,14 +1,15 @@
 <?php
 require_once 'fetch_tmdb.php';
 
-$id = $_GET['id'] ?? null;
-$type = $_GET['type'] ?? null;
+$id = $_GET['id'] ?? null; // ID de l'œuvre
+$type = $_GET['type'] ?? null; // Type de l'œuvre (film ou série)
 
 if (!$id || !$type) {
     echo "Paramètres manquants.";
     exit;
 }
 
+// Récupérer les détails de l'œuvre via l'API TMDB
 $details = getDetailsTMDB($id, $type);
 
 if (!$details) {
@@ -35,6 +36,7 @@ $release_date = $date;
 $overview = $description;
 $id_tmdb = $id;
 ?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -46,21 +48,27 @@ $id_tmdb = $id;
             background-color: #141414;
             color: white;
             font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
         }
+
         .header {
             background-color: #141414;
             padding: 15px 0;
             text-align: center;
         }
+
         .logo a {
             color: white;
             text-decoration: none;
             font-size: 2em;
         }
+
         .back-button {
             text-align: center;
             margin-top: 20px;
         }
+
         .back-button a {
             color: white;
             text-decoration: none;
@@ -69,32 +77,52 @@ $id_tmdb = $id;
             border-radius: 5px;
             font-weight: bold;
         }
+
         .back-button a:hover {
             background-color: #f40612;
         }
+
         .details-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-top: 30px;
-            text-align: center;
+            padding: 0 20px;
         }
+
         .details-container img {
             width: 300px;
             height: 450px;
             object-fit: cover;
             border-radius: 10px;
+            margin-right: 40px;
         }
-        .details-container h2 {
-            font-size: 2em;
-            margin-top: 20px;
-        }
-        .details-container p {
-            font-size: 1.1em;
+
+        .details-text {
+            max-width: 650px;
+            text-align: left;
             color: #ccc;
-            margin-top: 10px;
-            width: 60%;
-            margin: 0 auto;
         }
-        .add-to-catalog {
+
+        .details-text h2 {
+            font-size: 2.5em;
             margin-top: 20px;
+        }
+
+        .details-text p {
+            font-size: 1.2em;
+            margin-top: 10px;
+            line-height: 1.6;
+        }
+
+        .buttons-container {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .add-to-catalog, .back-button a {
             padding: 10px 20px;
             background-color: #e50914;
             color: white;
@@ -103,38 +131,119 @@ $id_tmdb = $id;
             text-decoration: none;
             border: none;
             cursor: pointer;
+            display: inline-block;
+            flex: 1;
+            text-align: center;
         }
-        .add-to-catalog:hover {
+
+        .back-button a {
+            background-color: black;
+        }
+
+        .add-to-catalog:hover, .back-button a:hover {
             background-color: #f40612;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+
+        .modal-content {
+            background-color: #222;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 60%;
+            max-width: 800px;
+            color: white;
+            border-radius: 10px;
+        }
+
+        .close {
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            top: 0;
+            right: 10px;
+            cursor: pointer;
+        }
+
+        .close:hover, .close:focus {
+            color: #f40612;
         }
     </style>
 </head>
 <body>
 
-<header class="header">
-    <div class="logo"><a href="accueil.php">Mon Catalogue</a></div>
-</header>
-
 <main class="details-container">
     <img src="<?= htmlspecialchars($poster) ?>" alt="Poster de <?= htmlspecialchars($title) ?>">
-    <h2><?= htmlspecialchars($title) ?></h2>
-    <p><strong>Date de sortie : </strong><?= htmlspecialchars($release_date) ?></p>
-    <p><?= htmlspecialchars($overview) ?></p>
+    <div class="details-text">
+        <h2><?= htmlspecialchars($title) ?></h2>
+        <p><strong>Date de sortie : </strong><?= htmlspecialchars($release_date) ?></p>
+        <p><?= htmlspecialchars($overview) ?></p>
 
-    <!-- Bouton d'ajout au catalogue -->
-    <button class="add-to-catalog" data-id="<?= htmlspecialchars($id_tmdb) ?>" data-type="<?= htmlspecialchars($type) ?>">
-        Ajouter au catalogue
-    </button>
+        <!-- Afficher les genres si disponibles -->
+        <?php if (!empty($genres)): ?>
+            <p><strong>Genres : </strong><?= implode(', ', $genres) ?></p>
+        <?php endif; ?>
 
-    <div class="back-button">
-        <a href="accueil.php?type=<?= htmlspecialchars($type) ?>">Retour à l'accueil</a>
+        <!-- Afficher la durée si disponible -->
+        <?php if ($duree): ?>
+            <p><strong>Durée : </strong><?= htmlspecialchars($duree) ?> minutes</p>
+        <?php else: ?>
+            <p><strong>Durée : </strong>Non spécifiée</p>
+        <?php endif; ?>
+
+        <div class="buttons-container">
+            <button class="add-to-catalog" data-id="<?= htmlspecialchars($id_tmdb) ?>" data-type="<?= htmlspecialchars($type) ?>">
+                Ajouter au catalogue
+            </button>
+
+            <div class="back-button">
+                <a href="accueil.php?recherche=<?= htmlspecialchars($_GET['recherche'] ?? '') ?>">Retour à l'accueil</a>
+            </div>
+        </div>
     </div>
 </main>
 
-<footer>
-    <p>&copy; <?= date('Y') ?> Mon Catalogue</p>
-</footer>
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Informations supplémentaires</h2>
+        <p><strong>Genres : </strong><?= implode(', ', $genres) ?></p>
+        <p><strong>Durée : </strong><?= $duree ? $duree . ' minutes' : 'Non spécifiée' ?></p>
+        <p><strong>Description complète : </strong><?= $description ?></p>
+    </div>
+</div>
 
-<script src="add_to_catalog.js"></script>
+<script>
+// Modale affichage
+var modal = document.getElementById("modal");
+var span = document.getElementsByClassName("close")[0];
+
+document.querySelector('.add-to-catalog').addEventListener('click', function() {
+    modal.style.display = "block";
+});
+
+span.onclick = function() {
+    modal.style.display = "none";
+};
+
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+</script>
+
 </body>
 </html>

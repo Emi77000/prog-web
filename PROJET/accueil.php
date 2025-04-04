@@ -68,7 +68,7 @@ foreach ($genres as $genre) {
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Accueil - Mon Catalogue</title>
+    <title>Accueil - TrackFlix</title>
     <link rel="stylesheet" href="styles.css">
     <style>
         .filter {
@@ -165,19 +165,63 @@ foreach ($genres as $genre) {
             text-decoration: none;
             color: inherit;
         }
+
+        /* Style de la modale */
+        .modal {
+            display: none; /* Cachée par défaut */
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.7); /* Fond sombre */
+        }
+
+        .modal-content {
+            background-color: #222;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 60%;
+            max-width: 800px;
+            color: white;
+            border-radius: 10px;
+        }
+
+        .close {
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            top: 0;
+            right: 10px;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #f40612;
+        }
     </style>
 </head>
 <body>
 <header class="header">
-    <div class="logo"><a href="accueil.php">Mon Catalogue</a></div>
     <nav>
-        <ul>
+        <ul style="display: flex; align-items: center; margin: 0;">
+            <!-- "TrackFlix" ajouté comme un élément de la liste -->
+            <li style="margin-right: auto;">
+                <a href="accueil.php" style="font-size: 2em; color: white; text-decoration: none;">TrackFlix</a>
+            </li>
             <li><a href="catalogPerso.php">Mon Catalogue</a></li>
-            <li><a href="suiviSerie.php">Suivi séries </a></li>
+            <li><a href="suiviSerie.php">Suivi séries</a></li>
+            <li><a href="compte.php">Compte</a></li>
             <li><a href="logout.php">Déconnexion</a></li>
         </ul>
     </nav>
 </header>
+
 
 <main>
 
@@ -208,7 +252,7 @@ foreach ($genres as $genre) {
                 $mediaType = $media['media_type'] ?? 'movie';
                 ?>
                 <div class="resultat-item">
-                    <a href="details.php?id=<?= $media['id'] ?>&type=<?= $mediaType ?>">
+                    <a href="details.php?id=<?= $media['id'] ?>&type=<?= $mediaType ?>" class="open-modal">
                         <img src="<?= htmlspecialchars($poster) ?>" alt="<?= htmlspecialchars($titre ?? '') ?>">
                         <h4><?= htmlspecialchars($titre ?? '') ?></h4>
                     </a>
@@ -230,7 +274,7 @@ foreach ($genres as $genre) {
                         $mediaType = $item['media_type'] ?? ($type === 'movie' ? 'movie' : 'tv');
                         ?>
                         <div class="carrousel-item">
-                            <a href="details.php?id=<?= $item['id'] ?>&type=<?= $mediaType ?>">
+                            <a href="details.php?id=<?= $item['id'] ?>&type=<?= $mediaType ?>" class="open-modal">
                                 <?php if ($poster): ?>
                                     <img src="<?= htmlspecialchars($poster) ?>" alt="<?= htmlspecialchars($titre ?? '') ?>">
                                 <?php endif; ?>
@@ -246,8 +290,51 @@ foreach ($genres as $genre) {
 
 </main>
 
-<footer>
-    <p>&copy; <?= date('Y') ?> Mon Catalogue</p>
-</footer>
+<!-- Modale pour afficher les détails -->
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <div id="modal-details">
+            <!-- Les détails du film/serie seront insérés ici par JavaScript -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // Récupérer l'élément modale et le bouton de fermeture
+    var modal = document.getElementById("modal");
+    var span = document.getElementsByClassName("close")[0];
+
+    // Quand l'utilisateur clique sur un élément du carrousel
+    document.querySelectorAll('.carrousel-item a').forEach(function(element) {
+        element.addEventListener('click', function(event) {
+            event.preventDefault(); // Empêche le lien de s'ouvrir normalement
+            var id = this.getAttribute('href').split('=')[1]; // Récupérer l'ID du film ou de la série
+            var type = this.getAttribute('href').split('=')[2];
+
+            // Charger les détails via AJAX
+            fetch('details.php?id=' + id + '&type=' + type)
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('modal-details').innerHTML = data;
+                    modal.style.display = "block"; // Ouvrir la modale
+                })
+                .catch(error => console.log('Erreur de chargement des détails :', error));
+        });
+    });
+
+    // Quand l'utilisateur clique sur "X", fermer la modale
+    span.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    // Quand l'utilisateur clique en dehors de la modale, fermer la modale
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
+
 </body>
 </html>

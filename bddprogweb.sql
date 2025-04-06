@@ -2,12 +2,17 @@
 CREATE DATABASE IF NOT EXISTS suivi_films_series;
 USE suivi_films_series;
 
-DROP TABLE IF EXISTS SuiviEpisodes;
-DROP TABLE IF EXISTS AvisEpisodes;
-DROP TABLE IF EXISTS Catalogue;
-DROP TABLE IF EXISTS FilmsSeries;
-DROP TABLE IF EXISTS Utilisateurs;
-DROP TABLE IF EXISTS Genres;
+DROP TABLE IF EXISTS suivi_episode;
+DROP TABLE IF EXISTS episode;
+DROP TABLE IF EXISTS saison;
+DROP TABLE IF EXISTS catalogue_utilisateur;
+DROP TABLE IF EXISTS oeuvre;
+DROP TABLE IF EXISTS utilisateur;
+
+
+
+
+
 
 
 -- Table des utilisateurs
@@ -52,7 +57,8 @@ CREATE TABLE saison (
                         titre_saison VARCHAR(255),
                         nb_episodes INT,
                         date YEAR,
-                        FOREIGN KEY (id_oeuvre) REFERENCES oeuvre(id_oeuvre) ON DELETE CASCADE
+                        FOREIGN KEY (id_oeuvre) REFERENCES oeuvre(id_oeuvre) ON DELETE CASCADE,
+                        UNIQUE KEY (id_oeuvre, numero_saison)
 );
 
 -- Table des épisodes
@@ -63,7 +69,8 @@ CREATE TABLE episode (
                          titre_episode VARCHAR(255),
                          resume TEXT,
                          date_diffusion DATE,
-                         FOREIGN KEY (id_saison) REFERENCES saison(id_saison) ON DELETE CASCADE
+                         FOREIGN KEY (id_saison) REFERENCES saison(id_saison) ON DELETE CASCADE,
+                         UNIQUE KEY (id_saison, numero_episode)
 );
 
 -- Suivi des épisodes vus par utilisateur
@@ -74,6 +81,7 @@ CREATE TABLE suivi_episode (
                                vu BOOLEAN DEFAULT FALSE,
                                date_vue DATETIME,
                                FOREIGN KEY (id_utilisateur) REFERENCES utilisateur(id_utilisateur) ON DELETE CASCADE,
-                               FOREIGN KEY (id_episode) REFERENCES episode(id_episode) ON DELETE CASCADE
+                               FOREIGN KEY (id_episode) REFERENCES episode(id_episode) ON DELETE CASCADE,
+                               UNIQUE KEY (id_utilisateur, id_episode)
 );
 

@@ -1,4 +1,9 @@
 <?php
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 require_once 'fetch_tmdb.php';
 
 $id = $_GET['id'] ?? null; // ID de l'œuvre
@@ -224,26 +229,6 @@ $id_tmdb = $id;
         <p><strong>Description complète : </strong><?= $description ?></p>
     </div>
 </div>
-
-<script>
-// Modale affichage
-var modal = document.getElementById("modal");
-var span = document.getElementsByClassName("close")[0];
-
-document.querySelector('.add-to-catalog').addEventListener('click', function() {
-    modal.style.display = "block";
-});
-
-span.onclick = function() {
-    modal.style.display = "none";
-};
-
-window.onclick = function(event) {
-    if (event.target == modal) {
-        modal.style.display = "none";
-    }
-}
-</script>
 
 </body>
 </html>

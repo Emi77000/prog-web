@@ -300,41 +300,56 @@ foreach ($genres as $genre) {
     </div>
 </div>
 
-<script>
-    // Récupérer l'élément modale et le bouton de fermeture
-    var modal = document.getElementById("modal");
-    var span = document.getElementsByClassName("close")[0];
+<script type="module">
+    import { activerBoutonsAjout } from './details.js';
 
-    // Quand l'utilisateur clique sur un élément du carrousel
-    document.querySelectorAll('.carrousel-item a').forEach(function(element) {
-        element.addEventListener('click', function(event) {
-            event.preventDefault(); // Empêche le lien de s'ouvrir normalement
-            var id = this.getAttribute('href').split('=')[1]; // Récupérer l'ID du film ou de la série
-            var type = this.getAttribute('href').split('=')[2];
+    const modal = document.getElementById("modal");
+    const span = document.getElementsByClassName("close")[0];
 
-            // Charger les détails via AJAX
+    document.querySelectorAll('.carrousel-item a, .resultat-item a').forEach(function (element) {
+        element.addEventListener('click', function (event) {
+            event.preventDefault();
+
+            const urlParams = new URL(this.href).searchParams;
+            const id = urlParams.get('id');
+            const type = urlParams.get('type');
+
             fetch('details.php?id=' + id + '&type=' + type)
                 .then(response => response.text())
                 .then(data => {
                     document.getElementById('modal-details').innerHTML = data;
-                    modal.style.display = "block"; // Ouvrir la modale
+                    modal.style.display = "block";
+                    activerBoutonsAjout(); // 👈 relie les boutons une fois le HTML injecté
                 })
-                .catch(error => console.log('Erreur de chargement des détails :', error));
+                .catch(error => console.error('Erreur de chargement des détails :', error));
         });
     });
 
-    // Quand l'utilisateur clique sur "X", fermer la modale
-    span.onclick = function() {
+    span.onclick = function () {
         modal.style.display = "none";
-    }
-
-    // Quand l'utilisateur clique en dehors de la modale, fermer la modale
-    window.onclick = function(event) {
-        if (event.target == modal) {
+    };
+    window.onclick = function (event) {
+        if (event.target === modal) {
             modal.style.display = "none";
         }
-    }
+    };
 </script>
 
+<div id="confirmation-message" style="
+    display: none;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #28a745;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 8px;
+    font-weight: bold;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    z-index: 1000;
+    transition: opacity 0.3s ease;
+">
+    Ajouté au catalogue !
+</div>
 </body>
 </html>

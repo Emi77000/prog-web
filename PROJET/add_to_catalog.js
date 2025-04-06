@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     // Sélectionner tous les boutons "Ajouter au catalogue"
-    const buttons = document.querySelectorAll('.add_to_catalog');
+    const buttons = document.querySelectorAll('.add-to-catalog');
 
     buttons.forEach(button => {
         button.addEventListener('click', function (event) {

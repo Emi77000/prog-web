@@ -11,12 +11,44 @@ function fetchTMDB($endpoint, $params = [])
     $response = @file_get_contents($url);
     return json_decode($response, true);
 }
-function rechercherTMDB($terme)
+
+// Vérifie si une œuvre contient les infos essentielles
+function estOeuvreValide($media)
 {
-    return fetchTMDB('search/multi', ['query' => $terme])['results'] ?? [];
+    return isset($media['poster_path'], $media['overview']) &&
+           $media['poster_path'] !== null &&
+           trim($media['overview']) !== '' &&
+           (
+               !empty($media['title']) ||
+               !empty($media['name'])
+           );
 }
 
+// Recherche multi (films + séries), avec filtrage des résultats incomplets
+function rechercherTMDB($terme)
+{
+    $resultats = fetchTMDB('search/multi', ['query' => $terme])['results'] ?? [];
+    return array_values(array_filter($resultats, 'estOeuvreValide'));
+}
+
+// Détails d’une œuvre (film ou série)
 function getDetailsTMDB($id, $type)
 {
     return fetchTMDB("$type/$id");
+}
+
+// Récupère les genres disponibles (films + séries), fusionne et déduplique
+function getGenresTMDB()
+{
+    $genresFilm = fetchTMDB("genre/movie/list")['genres'] ?? [];
+    $genresSerie = fetchTMDB("genre/tv/list")['genres'] ?? [];
+
+    $genres = array_merge($genresFilm, $genresSerie);
+    $genresUniques = [];
+
+    foreach ($genres as $genre) {
+        $genresUniques[$genre['id']] = $genre['name'];
+    }
+
+    return $genresUniques;
 }

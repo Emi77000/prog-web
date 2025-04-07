@@ -13,8 +13,43 @@ $termeRecherche = $_GET['recherche'] ?? null;
 $resultatsRecherche = [];
 
 if (!empty($termeRecherche)) {
+    // Normaliser le terme
+    $termeRechercheMin = strtolower(trim($termeRecherche));
+
+    // Rechercher par mot-clé (titre)
     $resultatsRecherche = rechercherTMDB($termeRecherche);
+
+    // Rechercher par genre
+    $genresMovie = fetchTMDB("genre/movie/list")['genres'] ?? [];
+    $genresTv = fetchTMDB("genre/tv/list")['genres'] ?? [];
+
+    // Fusionner tous les genres et éviter les doublons
+    $tousGenres = [];
+    foreach (array_merge($genresMovie, $genresTv) as $genre) {
+        $nomGenreMin = strtolower($genre['name']);
+        $tousGenres[$nomGenreMin] = $genre['id'];
+    }
+
+    if (array_key_exists($termeRechercheMin, $tousGenres)) {
+        $idGenre = $tousGenres[$termeRechercheMin];
+
+        // Chercher des films/séries de ce genre
+        $filmsGenre = fetchTMDB("discover/movie", ['with_genres' => $idGenre])['results'] ?? [];
+        $seriesGenre = fetchTMDB("discover/tv", ['with_genres' => $idGenre])['results'] ?? [];
+
+        // Ajouter le type pour différencier
+        foreach ($filmsGenre as &$film) {
+            $film['media_type'] = 'movie';
+        }
+        foreach ($seriesGenre as &$serie) {
+            $serie['media_type'] = 'tv';
+        }
+
+        // Fusionner avec les résultats de recherche de titre
+        $resultatsRecherche = array_merge($resultatsRecherche, $filmsGenre, $seriesGenre);
+    }
 }
+
 
 // --------- DONNÉES CARROUSELS PAR GENRE --------
 $type = $_GET['type'] ?? 'all';

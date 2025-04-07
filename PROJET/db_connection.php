@@ -2,8 +2,8 @@
 // Configuration de la connexion à la base de données
 define('DB_HOST', 'localhost');  // Hôte de la base de données (par défaut, c'est localhost)
 define('DB_NAME', 'suivi_films_series');  // Nom de la base de données
-define('DB_USER', 'emmataieb');  // Nom d'utilisateur MySQL
-define('DB_PASS', 'password');  // Mot de passe MySQL (modifiez-le si nécessaire)
+define('DB_USER', 'root');  // Nom d'utilisateur MySQL
+define('DB_PASS', '123soleil');  // Mot de passe MySQL (modifiez-le si nécessaire)
 define('DB_DSN', 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8');
 
 try {

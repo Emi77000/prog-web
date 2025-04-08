@@ -183,6 +183,11 @@ foreach ($genres as $genre) {
             background: #333;
             border-radius: 10px;
             overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .carrousel-item:hover {
+        transform: scale(1.05); /* Agrandit légèrement l'élément au survol */
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6); /* Ajoute une ombre portée pour l'effet */
         }
         .carrousel-item img {
             width: 100%;
@@ -239,6 +244,38 @@ foreach ($genres as $genre) {
         .close:focus {
             color: #f40612;
         }
+
+        .filter a {
+        margin: 0 15px;
+        text-decoration: none;
+        font-weight: bold;
+        padding: 10px 20px;
+        background-color: #e50914; /* Couleur de fond rouge */
+        color: white; /* Couleur du texte */
+        border-radius: 30px; /* Coins arrondis */
+        transition: all 0.3s ease; /* Ajoute une transition douce pour les effets */
+        }
+
+        .filter a:hover {
+            background-color: white; /* Fond blanc au survol */
+            color: #e50914; /* Texte rouge au survol */
+            transform: scale(1.1); /* Agrandit légèrement au survol */
+        }
+
+        .filter a.active {
+            background-color: #ff2a6b; /* Couleur pour le bouton actif */
+            color: #fff; /* Couleur du texte */
+        }
+
+        header nav ul li a {
+        color: white;
+        text-decoration: none;
+        margin: 0 10px;
+        }
+
+        header nav ul li a:hover {
+            color: red;  /* Texte devient rouge au survol */
+        }
     </style>
 </head>
 <body>
@@ -247,7 +284,7 @@ foreach ($genres as $genre) {
         <ul style="display: flex; align-items: center; margin: 0;">
             <!-- "TrackFlix" ajouté comme un élément de la liste -->
             <li style="margin-right: auto;">
-                <a href="accueil.php" style="font-size: 2em; color: white; text-decoration: none;">TrackFlix</a>
+                <a href="accueil.php" style="font-size: 2em;">TrackFlix</a>
             </li>
             <li><a href="catalogPerso.php">Mon Catalogue</a></li>
             <li><a href="suiviSerie.php">Suivi séries</a></li>

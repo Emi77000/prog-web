@@ -39,7 +39,7 @@ foreach ($films as $film) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Suivi Films et Séries</title>
+    <title>Mon Catalogue</title>
     <link rel="stylesheet" href="styles.css">
     <style>
         .rating { display: inline-block; direction: rtl; }
@@ -47,20 +47,50 @@ foreach ($films as $film) {
         .rating label { font-size: 24px; color: #ccc; cursor: pointer; }
         .rating input[type="radio"]:checked ~ label { color: #ffcc00; }
         .rating label:hover, .rating label:hover ~ label { color: #ffcc00; }
-        .tabs { display: flex; justify-content: center; margin-bottom: 20px; }
-        .tab-button { background-color: #ddd; border: none; padding: 10px 20px; margin: 0 5px; cursor: pointer; font-size: 16px; }
-        .tab-button.active { background-color: #007bff; color: white; }
+        
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .tab-button {
+            margin: 0 15px;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 10px 20px;
+            background-color: #e50914; /* Couleur de fond rouge */
+            color: white; /* Couleur du texte */
+            border-radius: 30px; /* Coins arrondis */
+            transition: all 0.3s ease; /* Ajoute une transition douce pour les effets */
+        }
+
+        .tab-button.active {
+            background-color: #f40612; /* Couleur de fond quand actif */
+            color: white; /* Texte blanc quand actif */
+        }
+
+        .tab-button:hover {
+            background-color: white; /* Fond blanc au survol */
+            color: #e50914; /* Texte rouge au survol */
+
+        }
+
         .poster-container { position: relative; display: inline-block; width: 100%; }
         .delete-btn { position: absolute; top: 5px; right: 5px; background-color: rgba(255, 0, 0, 0.7); color: white; border: none; width: 24px; height: 24px; font-size: 18px; font-weight: bold; text-align: center; cursor: pointer; border-radius: 50%; line-height: 24px; display: flex; align-items: center; justify-content: center; transition: background-color 0.3s ease-in-out; }
         .delete-btn:hover { background-color: rgba(255, 0, 0, 1); }
     </style>
 </head>
 <body>
-<header>
-    <h1> Mon catalogue </h1>
+<header class="header">
     <nav>
-        <ul>
-            <li><a href="accueil.php">Accueil</a></li>
+        <ul style="display: flex; align-items: center; margin: 0;">
+            <li style="margin-right: auto;">
+                <a href="accueil.php" style="font-size: 2em;">TrackFlix</a>
+            </li>
+            <li><a href="catalogPerso.php">Mon Catalogue</a></li>
+            <li><a href="suiviSerie.php">Suivi séries</a></li>
+            <li><a href="compte.php">Compte</a></li>
             <li><a href="logout.php">Déconnexion (<?= htmlspecialchars($_SESSION['pseudo']) ?>)</a></li>
         </ul>
     </nav>
@@ -70,7 +100,7 @@ foreach ($films as $film) {
     <h2>Films et Séries Ajoutés</h2>
 
     <div class="tabs">
-        <button class="tab-button active" data-filter="all">Tous</button>
+        <button class="tab-button active" data-filter="all">Tout</button>
         <button class="tab-button" data-filter="film">Films</button>
         <button class="tab-button" data-filter="serie">Séries</button>
     </div>
@@ -112,7 +142,6 @@ foreach ($films as $film) {
 </section>
 
 <script>
-
     document.addEventListener("DOMContentLoaded", function () {
         // Mise à jour note, commentaire, statut
         document.querySelectorAll(".update-field, .update-star").forEach(field => {

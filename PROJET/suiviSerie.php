@@ -45,9 +45,28 @@ $series = $stmt->fetchAll();
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Mon catalogue</title>
+    <title>Suivi Séries</title>
     <link rel="stylesheet" href="styles.css">
     <style>
+        /* Style de la barre de navigation (identique à celle de accueil.php) */
+        header nav ul {
+            display: flex;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+            list-style-type: none;
+        }
+        header nav ul li {
+            margin-right: 20px;
+        }
+        header nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        header nav ul li a:hover {
+            color: red;
+        }
         .serie-card {
             display: flex;
             align-items: center;
@@ -118,6 +137,21 @@ $series = $stmt->fetchAll();
     </style>
 </head>
 <body>
+
+<header class="header">
+    <nav>
+        <ul style="display: flex; align-items: center; margin: 0;">
+            <li style="margin-right: auto;">
+                <a href="accueil.php" style="font-size: 2em;">TrackFlix</a>
+            </li>
+            <li><a href="catalogPerso.php">Mon Catalogue</a></li>
+            <li><a href="suiviSerie.php">Suivi séries</a></li>
+            <li><a href="compte.php">Compte</a></li>
+            <li><a href="logout.php">Déconnexion (<?= htmlspecialchars($_SESSION['pseudo']) ?>)</a></li>
+        </ul>
+    </nav>
+</header>
+
 <main class="catalogue">
     <h2>Mes séries</h2>
 
@@ -152,7 +186,6 @@ $series = $stmt->fetchAll();
         </div>
     <?php endforeach; ?>
 </main>
-
 <script>
     document.querySelectorAll('.vu-checkbox').forEach(box => {
         box.addEventListener('change', function () {
@@ -180,5 +213,6 @@ $series = $stmt->fetchAll();
     });
 
 </script>
+
 </body>
 </html>

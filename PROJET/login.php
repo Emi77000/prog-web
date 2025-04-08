@@ -46,10 +46,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         if ($stmt->rowCount() > 0) {
             $erreur = "Email ou pseudo déjà utilisé.";
         } else {
+            // Insérer l'utilisateur dans la base de données
             $hash = password_hash($mot_de_passe, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare("INSERT INTO utilisateur (pseudo, email, mot_de_passe) VALUES (?, ?, ?)");
             $stmt->execute([$pseudo, $email, $hash]);
-            $message = "Inscription réussie ! Vous pouvez maintenant vous connecter.";
+
+            // Créer la session utilisateur
+            $_SESSION['id_utilisateur'] = $pdo->lastInsertId(); // Utilise l'ID de l'utilisateur nouvellement créé
+            $_SESSION['pseudo'] = $pseudo;
+            $_SESSION['email'] = $email;
+
+            // Rediriger vers la page d'accueil
+            header('Location: accueil.php');
+            exit;
         }
     }
 }
@@ -64,22 +73,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f4f9;
+            background-color: #121212;
             margin: 0;
             padding: 0;
+            color: white;
         }
 
         .container {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             gap: 40px;
             flex-wrap: wrap;
+            padding: 20px;
         }
 
         .box {
-            background: #ffffff;
+            background: #1f1f1f;
             padding: 40px;
             border-radius: 10px;
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
@@ -89,9 +100,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         }
 
         h2 {
-            color: #333;
             margin-bottom: 20px;
             font-size: 24px;
+            color: #fff;
         }
 
         input[type="text"], input[type="email"], input[type="password"] {
@@ -104,14 +115,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         }
 
         input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus {
-            border-color: #007bff;
+            border-color: #e50914;
             outline: none;
         }
 
         button {
             width: 100%;
             padding: 14px;
-            background-color: #007bff;
+            background-color: #e50914;
             color: white;
             font-size: 16px;
             border: none;
@@ -121,57 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         }
 
         button:hover {
-            background-color: #0056b3;
-        }
-
-        .message {
-            color: red;
-            margin-top: 20px;
-            font-size: 14px;
-        }
-
-        .footer {
-            position: absolute;
-            bottom: 20px;
-            width: 100%;
-            text-align: center;
-            font-size: 14px;
-            color: #555;
-        }
-
-        .footer a {
-            color: #007bff;
-            text-decoration: none;
-        }
-
-        .footer a:hover {
-            text-decoration: underline;
-        }
-
-        .container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            gap: 40px;
-            flex-wrap: wrap; /* Permet l'adaptation mobile */
-            padding: 20px;
-        }
-
-        .box {
-            background: #ffffff;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-
-        @media (max-width: 900px) {
-            .container {
-                flex-direction: column;
-            }
+            background-color: #f40612;
         }
 
         .message {
@@ -184,11 +145,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             color: #28a745;
         }
 
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .footer a {
+            color: #e50914;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .register-box {
+            display: none;
+        }
+
+        a {
+            color: white;
+        }
+
+        a:hover {
+            color: #e50914;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 <body>
+
 <div class="container">
+    <!-- Formulaire de connexion -->
     <div class="box">
+        <h2>Connexion</h2>
+        <form method="POST" onsubmit="return validateLogin();">
+            <input type="hidden" name="action" value="login">
+            <input type="email" name="email" id="login-email" placeholder="Email" required>
+            <input type="password" name="mot_de_passe" id="login-password" placeholder="Mot de passe" required>
+            <button type="submit">Se connecter</button>
+            <p id="login-error" class="message">
+                <?php if (!empty($erreur) && isset($_POST['action']) && $_POST['action'] === 'login') echo htmlspecialchars($erreur); ?>
+            </p>
+        </form>
+        <p><a href="javascript:void(0);" onclick="toggleRegisterForm()">Pas encore inscrit ? S'inscrire ici</a></p>
+    </div>
+
+    <!-- Formulaire d'inscription -->
+    <div class="box register-box">
         <h2>Créer un compte</h2>
         <form method="POST" onsubmit="return validateRegister();">
             <input type="hidden" name="action" value="register">
@@ -203,24 +217,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 <?php if (!empty($message)) echo htmlspecialchars($message); ?>
             </p>
         </form>
-    </div>
-    <div class="box">
-        <h2>Connexion</h2>
-        <form method="POST" onsubmit="return validateLogin();">
-            <input type="hidden" name="action" value="login">
-            <input type="email" name="email" id="login-email" placeholder="Email" required>
-            <input type="password" name="mot_de_passe" id="login-password" placeholder="Mot de passe" required>
-            <button type="submit">Se connecter</button>
-            <p id="login-error" class="message">
-                <?php if (!empty($erreur) && isset($_POST['action']) && $_POST['action'] === 'login') echo htmlspecialchars($erreur); ?>
-            </p>
-        </form>
+        <p><a href="javascript:void(0);" onclick="toggleLoginForm()">Déjà un compte ? Se connecter ici</a></p>
     </div>
 </div>
 
 <footer class="footer">
-    <p>&copy; <?= date('Y') ?> Mon Catalogue</p>
+    <p>&copy; <?= date('Y') ?> TrackFlix</p>
 </footer>
-</body>
 
+<script>
+    function toggleRegisterForm() {
+        document.querySelector('.register-box').style.display = 'block';
+        document.querySelector('.box').style.display = 'none';
+    }
+
+    function toggleLoginForm() {
+        document.querySelector('.box').style.display = 'block';
+        document.querySelector('.register-box').style.display = 'none';
+    }
+</script>
+
+</body>
 </html>

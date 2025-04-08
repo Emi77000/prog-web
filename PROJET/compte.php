@@ -191,9 +191,13 @@ $seriesVues = array_filter($oeuvresVues, fn($o) => $o['type'] === 'tv');
             color: white;
         }
         header nav ul li a {
-            color: white;
-            text-decoration: none;
-            margin: 0 10px;
+        color: white;
+        text-decoration: none;
+        margin: 0 10px;
+        }
+
+        header nav ul li a:hover {
+            color: red;  /* Texte devient rouge au survol */
         }
         header nav ul {
             background-color: #1f1f1f;

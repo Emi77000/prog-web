@@ -10,11 +10,6 @@ DROP TABLE IF EXISTS oeuvre;
 DROP TABLE IF EXISTS utilisateur;
 
 
-
-
-
-
-
 -- Table des utilisateurs
 CREATE TABLE utilisateur (
                              id_utilisateur INT AUTO_INCREMENT PRIMARY KEY,
@@ -79,6 +74,8 @@ CREATE TABLE suivi_episode (
                                id_utilisateur INT NOT NULL,
                                id_episode INT NOT NULL,
                                vu BOOLEAN DEFAULT FALSE,
+                               note INT, -- sur 5
+                               commentaire TEXT,
                                date_vue DATETIME,
                                FOREIGN KEY (id_utilisateur) REFERENCES utilisateur(id_utilisateur) ON DELETE CASCADE,
                                FOREIGN KEY (id_episode) REFERENCES episode(id_episode) ON DELETE CASCADE,

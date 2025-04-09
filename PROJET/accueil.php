@@ -66,8 +66,19 @@ if ($type === 'tv') {
     );
 }
 
+<<<<<<< HEAD
 $sections = [];
 foreach ($genres as $genre) {
+=======
+$genreId = $_GET['genre'] ?? null;
+
+$sections = [];
+foreach ($genres as $genre) {
+    if ($genreId && $genreId != $genre['id']) {
+        continue;  // Si un genre est sélectionné, ne traiter que ce genre
+    }
+    
+>>>>>>> 1e27fef (liste déroulante genre)
     $id = $genre['id'];
     $name = $genre['name'];
 
@@ -96,7 +107,14 @@ foreach ($genres as $genre) {
             'items' => $items
         ];
     }
+<<<<<<< HEAD
 }
+=======
+
+    
+}
+
+>>>>>>> 1e27fef (liste déroulante genre)
 ?>
 
 <!DOCTYPE html>
@@ -120,13 +138,26 @@ foreach ($genres as $genre) {
             border-radius: 5px;
         }
         .search-bar {
+<<<<<<< HEAD
             text-align: center;
             margin: 30px 0;
+=======
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border-radius: 30px; /* Coins arrondis */
+            margin-left: 20px;
+>>>>>>> 1e27fef (liste déroulante genre)
         }
         .search-bar input[type="text"] {
             padding: 10px;
             width: 300px;
             font-size: 16px;
+<<<<<<< HEAD
+=======
+
+>>>>>>> 1e27fef (liste déroulante genre)
         }
         .search-bar button {
             padding: 10px 16px;
@@ -186,8 +217,13 @@ foreach ($genres as $genre) {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         .carrousel-item:hover {
+<<<<<<< HEAD
         transform: scale(1.05); /* Agrandit légèrement l'élément au survol */
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6); /* Ajoute une ombre portée pour l'effet */
+=======
+            transform: scale(1.05); /* Agrandit légèrement l'élément au survol */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6); /* Ajoute une ombre portée pour l'effet */
+>>>>>>> 1e27fef (liste déroulante genre)
         }
         .carrousel-item img {
             width: 100%;
@@ -246,6 +282,7 @@ foreach ($genres as $genre) {
         }
 
         .filter a {
+<<<<<<< HEAD
         margin: 0 15px;
         text-decoration: none;
         font-weight: bold;
@@ -254,6 +291,16 @@ foreach ($genres as $genre) {
         color: white; /* Couleur du texte */
         border-radius: 30px; /* Coins arrondis */
         transition: all 0.3s ease; /* Ajoute une transition douce pour les effets */
+=======
+            margin: 0 15px;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 10px 20px;
+            background-color: #e50914; /* Couleur de fond rouge */
+            color: white; /* Couleur du texte */
+            border-radius: 30px; /* Coins arrondis */
+            transition: all 0.3s ease; /* Ajoute une transition douce pour les effets */
+>>>>>>> 1e27fef (liste déroulante genre)
         }
 
         .filter a:hover {
@@ -263,7 +310,11 @@ foreach ($genres as $genre) {
         }
 
         .filter a.active {
+<<<<<<< HEAD
             background-color: #ff2a6b; /* Couleur pour le bouton actif */
+=======
+            background-color: #e50914; /* Couleur pour le bouton actif */
+>>>>>>> 1e27fef (liste déroulante genre)
             color: #fff; /* Couleur du texte */
         }
 
@@ -276,6 +327,54 @@ foreach ($genres as $genre) {
         header nav ul li a:hover {
             color: red;  /* Texte devient rouge au survol */
         }
+<<<<<<< HEAD
+=======
+        .search-container {
+            display: flex;
+            justify-content: space-between;  /* Espacement entre les éléments */
+            align-items: center;
+            margin-bottom: 20px;
+            align-items: center;
+            margin: 0 auto; /* Cela centrera le conteneur */
+        }
+
+        /* Style de la liste déroulante */
+        .filter-genre {
+            display: flex; /* Flexbox pour que l'étiquette et la liste déroulante s'affichent horizontalement */
+            align-items: center;
+            margin-right: 20px; /* Espacement à droite */
+        }
+
+        .filter-genre select {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #222;
+            color: white;
+            border: 2px solid #e50914; /* Bordure rouge */
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-genre select:hover {
+            background-color: #e50914; /* Fond rouge au survol */
+            color: white; /* Texte blanc au survol */
+        }
+
+        .filter-genre select:focus {
+            outline: none;
+            background-color: #e50914; /* Fond rose au focus */
+            border-color: #e50914; /* Bordure rose au focus */
+        }
+
+        .filter-genre label {
+            font-size: 16px;
+            color: white;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+>>>>>>> 1e27fef (liste déroulante genre)
     </style>
 </head>
 <body>
@@ -298,6 +397,13 @@ foreach ($genres as $genre) {
 <main>
 
     <!-- Barre de recherche -->
+<<<<<<< HEAD
+=======
+    <!-- Barre de recherche et liste déroulante regroupées dans un même conteneur -->
+<!-- Conteneur de la barre de recherche et de la liste déroulante -->
+<div class="search-container">
+    <!-- Barre de recherche -->
+>>>>>>> 1e27fef (liste déroulante genre)
     <div class="search-bar">
         <form method="GET" action="accueil.php">
             <input type="text" name="recherche" placeholder="Rechercher un film ou une série..." value="<?= htmlspecialchars($termeRecherche ?? '') ?>" required>
@@ -312,6 +418,30 @@ foreach ($genres as $genre) {
         <a href="accueil.php?type=tv">Séries</a>
     </div>
 
+<<<<<<< HEAD
+=======
+    <!-- Liste déroulante pour trier par genre -->
+    <div class="filter-genre">
+    <label for="genre-select" style="color: white;">Trier par genre :</label>
+    <select id="genre-select" name="genre" onchange="window.location.href=this.value">
+        <option value="accueil.php?type=all" <?= !isset($_GET['genre']) ? 'selected' : '' ?>>Tous les genres</option>
+        <?php foreach ($genres as $genre): ?>
+            <option value="accueil.php?type=all&genre=<?= $genre['id'] ?>" <?= isset($_GET['genre']) && $_GET['genre'] == $genre['id'] ? 'selected' : '' ?>>
+                <?= htmlspecialchars($genre['name']) ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+</div>
+
+</div>
+
+
+
+
+
+    
+
+>>>>>>> 1e27fef (liste déroulante genre)
     <!-- Résultats de recherche -->
     <?php if (!empty($termeRecherche)): ?>
         <h2 style="margin-left: 30px;">Résultats pour "<?= htmlspecialchars($termeRecherche) ?>"</h2>

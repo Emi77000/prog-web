@@ -47,7 +47,7 @@ foreach ($films as $film) {
         .rating label { font-size: 24px; color: #ccc; cursor: pointer; }
         .rating input[type="radio"]:checked ~ label { color: #ffcc00; }
         .rating label:hover, .rating label:hover ~ label { color: #ffcc00; }
-        
+
         .tabs {
             display: flex;
             justify-content: center;
@@ -123,15 +123,19 @@ foreach ($films as $film) {
                             <option value="en cours" <?= $film['statut'] == 'en cours' ? 'selected' : '' ?>>En cours</option>
                             <option value="vu" <?= $film['statut'] == 'vu' ? 'selected' : '' ?>>Vu</option>
                         </select>
-                        <label>Note :</label>
-                        <div class="rating" data-film-id="<?= $film['id_oeuvre'] ?>">
-                            <?php for ($i = 5; $i >= 1; $i--): ?>
-                                <input type="radio" id="star<?= $i ?>-<?= $film['id_oeuvre'] ?>" name="note-<?= $film['id_oeuvre'] ?>" value="<?= $i ?>" class="update-star" <?= ($film['note'] == $i) ? 'checked' : '' ?>>
-                                <label for="star<?= $i ?>-<?= $film['id_oeuvre'] ?>">★</label>
-                            <?php endfor; ?>
-                        </div>
-                        <label>Commentaire :</label>
-                        <textarea class="styled-textarea update-field" data-field="commentaire"><?= htmlspecialchars($film['commentaire'] ?? '') ?></textarea>
+                        <?php if ($film["statut"] === "vu"): ?>
+                            <label>Note :</label>
+                            <div class="rating" data-film-id="<?= $film['id_oeuvre'] ?>">
+                                <?php for ($i = 5; $i >= 1; $i--): ?>
+                                    <input type="radio" id="star<?= $i ?>-<?= $film['id_oeuvre'] ?>" name="note-<?= $film['id_oeuvre'] ?>" value="<?= $i ?>" class="update-star" <?= ($film['note'] == $i) ? 'checked' : '' ?>>
+                                    <label for="star<?= $i ?>-<?= $film['id_oeuvre'] ?>">★</label>
+                                <?php endfor; ?>
+                            </div>
+                            <label>Commentaire :</label>
+                            <textarea class="styled-textarea update-field" data-field="commentaire"><?= htmlspecialchars($film['commentaire'] ?? '') ?></textarea>
+                        <?php else: ?>
+                            <p class="note-disabled"></p>
+                        <?php endif; ?>
                     </div>
                 <?php endforeach; ?>
             <?php else: ?>

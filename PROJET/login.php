@@ -2,8 +2,12 @@
 session_start();
 require_once 'db_connection.php';
 
-$message = '';
 $erreur = '';
+$erreur_register = '';
+$message = '';
+$afficher_formulaire_inscription = false;
+$old_pseudo = '';
+$old_email = '';
 
 // Connexion
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'login') {
@@ -34,35 +38,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $email = $_POST['email'] ?? '';
     $mot_de_passe = $_POST['mot_de_passe'] ?? '';
 
+    $old_pseudo = $pseudo;
+    $old_email = $email;
+    $afficher_formulaire_inscription = true;
+
     if (strlen($pseudo) < 3) {
-        $erreur = "Le pseudo est trop court.";
+        $erreur_register = "Le pseudo est trop court.";
     } elseif (strlen($mot_de_passe) < 6) {
-        $erreur = "Le mot de passe doit contenir au moins 6 caractères.";
+        $erreur_register = "Le mot de passe doit contenir au moins 6 caractères.";
     } else {
-        // Vérifier si l'email ou le pseudo existe déjà
         $stmt = $pdo->prepare("SELECT * FROM utilisateur WHERE email = ? OR pseudo = ?");
         $stmt->execute([$email, $pseudo]);
 
         if ($stmt->rowCount() > 0) {
-            $erreur = "Email ou pseudo déjà utilisé.";
+            $erreur_register = "Email ou pseudo déjà utilisé.";
         } else {
-            // Insérer l'utilisateur dans la base de données
             $hash = password_hash($mot_de_passe, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare("INSERT INTO utilisateur (pseudo, email, mot_de_passe) VALUES (?, ?, ?)");
             $stmt->execute([$pseudo, $email, $hash]);
 
-            // Créer la session utilisateur
-            $_SESSION['id_utilisateur'] = $pdo->lastInsertId(); // Utilise l'ID de l'utilisateur nouvellement créé
+            $_SESSION['id_utilisateur'] = $pdo->lastInsertId();
             $_SESSION['pseudo'] = $pseudo;
             $_SESSION['email'] = $email;
 
-            // Rediriger vers la page d'accueil
             header('Location: accueil.php');
             exit;
         }
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="fr">
@@ -187,7 +192,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 <div class="container">
     <!-- Formulaire de connexion -->
-    <div class="box">
+    <div class="box" style="<?= $afficher_formulaire_inscription ? 'display:none;' : '' ?>">
         <h2>Connexion</h2>
         <form method="POST" onsubmit="return validateLogin();">
             <input type="hidden" name="action" value="login">
@@ -202,23 +207,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     </div>
 
     <!-- Formulaire d'inscription -->
-    <div class="box register-box">
+    <div class="box register-box" style="<?= $afficher_formulaire_inscription ? 'display:block;' : 'display:none;' ?>">
         <h2>Créer un compte</h2>
         <form method="POST" onsubmit="return validateRegister();">
             <input type="hidden" name="action" value="register">
-            <input type="text" name="pseudo" id="reg-username" placeholder="Pseudo" required>
-            <input type="email" name="email" id="reg-email" placeholder="Email" required>
+            <input type="text" name="pseudo" id="reg-username" placeholder="Pseudo" required
+                   value="<?= htmlspecialchars($old_pseudo) ?>">
+            <input type="email" name="email" id="reg-email" placeholder="Email" required
+                   value="<?= htmlspecialchars($old_email) ?>">
             <input type="password" name="mot_de_passe" id="reg-password" placeholder="Mot de passe" required>
             <button type="submit">S'inscrire</button>
             <p id="reg-error" class="message">
-                <?php if (!empty($erreur) && isset($_POST['action']) && $_POST['action'] === 'register') echo htmlspecialchars($erreur); ?>
-            </p>
-            <p class="success message">
-                <?php if (!empty($message)) echo htmlspecialchars($message); ?>
+                <?php if (!empty($erreur_register)) echo htmlspecialchars($erreur_register); ?>
             </p>
         </form>
         <p><a href="javascript:void(0);" onclick="toggleLoginForm()">Déjà un compte ? Se connecter ici</a></p>
     </div>
+
 </div>
 
 <footer class="footer">

@@ -23,7 +23,9 @@ export function activerBoutonsAjout() {
                     console.log("Réponse JSON : ", data);
                     if (data.success) {
                         afficherMessageConfirmation(data.success);
-                    } else {
+                    } else if (data.info) {
+                        afficherMessageConfirmation(data.info);
+                    } else if (data.error) {
                         afficherMessageConfirmation("Erreur : " + data.error);
                     }
                 })

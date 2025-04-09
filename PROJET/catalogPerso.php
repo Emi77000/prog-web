@@ -76,6 +76,69 @@ foreach ($films as $film) {
 
         }
 
+        .modal-confirm {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-box {
+            background-color: #1f1f1f;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+        }
+
+        .modal-box p {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: space-around;
+            gap: 15px;
+        }
+
+        .modal-actions button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 15px;
+            transition: background-color 0.3s ease;
+        }
+
+        #btn-confirm-yes {
+            background-color: #e50914;
+            color: white;
+        }
+
+        #btn-confirm-yes:hover {
+            background-color: #f40612;
+        }
+
+        #btn-confirm-no {
+            background-color: #444;
+            color: white;
+        }
+
+        #btn-confirm-no:hover {
+            background-color: #666;
+        }
+
+
         .poster-container { position: relative; display: inline-block; width: 100%; }
         .delete-btn { position: absolute; top: 5px; right: 5px; background-color: rgba(255, 0, 0, 0.7); color: white; border: none; width: 24px; height: 24px; font-size: 18px; font-weight: bold; text-align: center; cursor: pointer; border-radius: 50%; line-height: 24px; display: flex; align-items: center; justify-content: center; transition: background-color 0.3s ease-in-out; }
         .delete-btn:hover { background-color: rgba(255, 0, 0, 1); }
@@ -215,33 +278,64 @@ foreach ($films as $film) {
         });
 
         // Suppression d’un élément
+        let idASupprimer = null;
+        let elementASupprimer = null;
+
+        const modal = document.getElementById("modal-confirm");
+        const btnYes = document.getElementById("btn-confirm-yes");
+        const btnNo = document.getElementById("btn-confirm-no");
+
         document.querySelectorAll(".delete-btn").forEach(button => {
             button.addEventListener("click", function (event) {
                 event.stopPropagation();
-                if (!confirm("Voulez-vous vraiment supprimer cet élément ?")) return;
-
-                let filmId = this.dataset.id;
-                let filmElement = this.closest(".catalogue-item");
-
-                fetch("supprimer_catalogue.php", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                    body: `id_oeuvre=${filmId}`
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            filmElement.remove();
-                            console.log("Suppression réussie !");
-                        } else {
-                            console.error("Erreur SQL:", data.error);
-                        }
-                    })
-                    .catch(error => console.error("Erreur AJAX:", error));
+                idASupprimer = this.dataset.id;
+                elementASupprimer = this.closest(".catalogue-item");
+                modal.style.display = "flex";
             });
         });
+
+        btnNo.addEventListener("click", function () {
+            modal.style.display = "none";
+            idASupprimer = null;
+            elementASupprimer = null;
+        });
+
+        btnYes.addEventListener("click", function () {
+            if (!idASupprimer || !elementASupprimer) return;
+
+            fetch("supprimer_catalogue.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: `id_oeuvre=${idASupprimer}`
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        elementASupprimer.remove();
+                        afficherToast("Œuvre supprimée du catalogue.");
+                    } else {
+                        console.error("Erreur SQL:", data.error);
+                    }
+                    modal.style.display = "none";
+                })
+                .catch(error => {
+                    console.error("Erreur AJAX:", error);
+                    modal.style.display = "none";
+                });
+        });
+
     });
 </script>
+
+<div id="modal-confirm" class="modal-confirm">
+    <div class="modal-box">
+        <p>Voulez-vous vraiment supprimer cette œuvre de votre catalogue ?</p>
+        <div class="modal-actions">
+            <button id="btn-confirm-yes">Oui, supprimer</button>
+            <button id="btn-confirm-no">Annuler</button>
+        </div>
+    </div>
+</div>
 
 <footer>
     <p>&copy; 2025 Suivi Films et Séries</p>

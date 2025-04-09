@@ -50,6 +50,9 @@ if (!$alreadyInCatalog) {
     $stmt_catalogue = $pdo->prepare("INSERT INTO catalogue_utilisateur (id_utilisateur, id_oeuvre, type)
                                      VALUES (?, ?, ?)");
     $stmt_catalogue->execute([$id_utilisateur, $id_tmdb, $type]);
+} else {
+    echo json_encode(['info' => 'Cette œuvre est déjà présente dans votre catalogue.']);
+    exit;
 }
 
 // Si c'est une série, on ajoute les saisons et épisodes

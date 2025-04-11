@@ -20,6 +20,39 @@ if (!$utilisateur) {
 $message = '';
 $erreur = '';
 
+// Traitement du formulaire de modification
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'modifier') {
+    $nouvelEmail = $_POST['nouveau_email'] ?? '';
+    $nouveauMDP = $_POST['nouveau_mot_de_passe'] ?? '';
+
+    if (!empty($nouvelEmail)) {
+        if (!filter_var($nouvelEmail, FILTER_VALIDATE_EMAIL)) {
+            $erreur = "Email invalide.";
+        } else {
+            $stmt = $pdo->prepare("UPDATE utilisateur SET email = ? WHERE id_utilisateur = ?");
+            $stmt->execute([$nouvelEmail, $id_utilisateur]);
+            $message = "Email mis à jour.";
+            $utilisateur['email'] = $nouvelEmail; // mettre à jour localement
+        }
+    }
+
+    if (!empty($nouveauMDP)) {
+        if (strlen($nouveauMDP) < 6) {
+            $erreur = "Le mot de passe doit contenir au moins 6 caractères.";
+        } else {
+            $hash = password_hash($nouveauMDP, PASSWORD_DEFAULT);
+            $stmt = $pdo->prepare("UPDATE utilisateur SET mot_de_passe = ? WHERE id_utilisateur = ?");
+            $stmt->execute([$hash, $id_utilisateur]);
+            $message = "Mot de passe mis à jour.";
+        }
+    }
+
+    if (empty($nouvelEmail) && empty($nouveauMDP)) {
+        $erreur = "Veuillez remplir au moins un champ.";
+    }
+}
+
+
 // Récupérer les œuvres vues
 $stmtVus = $pdo->prepare("SELECT cu.*, o.* FROM catalogue_utilisateur cu 
     JOIN oeuvre o ON cu.id_oeuvre = o.id_oeuvre 

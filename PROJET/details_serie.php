@@ -130,9 +130,25 @@ $moyenne = count($notesValides) > 0 ? round(array_sum(array_column($notesValides
         .confirmation-message.visible {
             opacity: 1;
         }
+        .btn-retour {
+            margin-bottom: 20px;
+            background-color: #ff4747;
+            color: white;
+            font-size: 1em;
+            padding: 0.4em 1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn-retour:hover {
+            background-color: #ff2b2b;
+        }
     </style>
 </head>
 <body>
+
+<!-- Bouton retour -->
+<button class="btn-retour" onclick="history.back()">← Retour</button>
 
 <h2><?= htmlspecialchars($oeuvre['titre']) ?></h2>
 <p>

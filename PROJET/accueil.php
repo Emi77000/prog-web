@@ -53,6 +53,51 @@ if (!empty($termeRecherche)) {
 
 // --------- DONNÉES CARROUSELS PAR GENRE --------
 $type = $_GET['type'] ?? 'all';
+$genreId = $_GET['genre'] ?? null;
+
+$sections = [];
+$genres = fetchTMDB("genre/tv/list")['genres'] ?? [];
+if ($type === 'movie') {
+    $genres = fetchTMDB("genre/movie/list")['genres'] ?? [];
+} elseif ($type === 'all') {
+    $genresMovie = fetchTMDB("genre/movie/list")['genres'] ?? [];
+    $genresTv = fetchTMDB("genre/tv/list")['genres'] ?? [];
+    $genres = array_merge($genresMovie, $genresTv);
+}
+
+foreach ($genres as $genre) {
+    if ($genreId && $genreId != $genre['id']) {
+        continue; // Si un genre est sélectionné, ne traiter que ce genre
+    }
+    $id = $genre['id'];
+    $name = $genre['name'];
+    $items = [];
+
+    if ($type === 'tv') {
+        $items = fetchTMDB("discover/tv", ['with_genres' => $id])['results'] ?? [];
+    } elseif ($type === 'movie') {
+        $items = fetchTMDB("discover/movie", ['with_genres' => $id])['results'] ?? [];
+    } else {
+        $tvItems = fetchTMDB("discover/tv", ['with_genres' => $id])['results'] ?? [];
+        $movieItems = fetchTMDB("discover/movie", ['with_genres' => $id])['results'] ?? [];
+        foreach ($tvItems as &$tv) {
+            $tv['media_type'] = 'tv';
+        }
+        foreach ($movieItems as &$movie) {
+            $movie['media_type'] = 'movie';
+        }
+        $items = array_merge($movieItems, $tvItems);
+    }
+
+    if (!empty($items)) {
+        $sections[] = [
+            'genre' => $name,
+            'items' => $items
+        ];
+    }
+}
+
+$type = $_GET['type'] ?? 'all';
 $genres = [];
 
 if ($type === 'tv') {
@@ -374,25 +419,23 @@ $genreId = $_GET['genre'] ?? null;
         </form>
     </div>
 
-    <!-- Filtres par type -->
     <div class="filter">
-        <a href="accueil.php?type=all">Tout</a>
-        <a href="accueil.php?type=movie">Films</a>
-        <a href="accueil.php?type=tv">Séries</a>
-    </div>
-
-    <!-- Liste déroulante pour trier par genre -->
-    <div class="filter-genre">
+    <a href="accueil.php?type=all&genre=<?= $genreId ?>">Tout</a>
+    <a href="accueil.php?type=movie&genre=<?= $genreId ?>">Films</a>
+    <a href="accueil.php?type=tv&genre=<?= $genreId ?>">Séries</a>
+</div>
+<div class="filter-genre">
     <label for="genre-select" style="color: white;">Trier par genre :</label>
-    <select id="genre-select" name="genre" onchange="window.location.href=this.value">
-        <option value="accueil.php?type=all" <?= !isset($_GET['genre']) ? 'selected' : '' ?>>Tous les genres</option>
+    <select id="genre-select" name="genre" onchange="window.location.href='accueil.php?type=<?= $type ?>&genre=' + this.value">
+        <option value="" <?= !isset($_GET['genre']) ? 'selected' : '' ?>>Tous les genres</option>
         <?php foreach ($genres as $genre): ?>
-            <option value="accueil.php?type=all&genre=<?= $genre['id'] ?>" <?= isset($_GET['genre']) && $_GET['genre'] == $genre['id'] ? 'selected' : '' ?>>
+            <option value="<?= $genre['id'] ?>" <?= isset($_GET['genre']) && $_GET['genre'] == $genre['id'] ? 'selected' : '' ?>>
                 <?= htmlspecialchars($genre['name']) ?>
             </option>
         <?php endforeach; ?>
     </select>
 </div>
+
 
 </div>
 
@@ -492,6 +535,20 @@ $genreId = $_GET['genre'] ?? null;
             modal.style.display = "none";
         }
     };
+    document.querySelectorAll('.filter a').forEach(function (element) {
+    element.addEventListener('click', function (event) {
+        event.preventDefault();
+        const genreSelect = document.getElementById('genre-select');
+        const genre = genreSelect.value;
+        window.location.href = this.href + '&genre=' + genre;
+    });
+});
+
+document.getElementById('genre-select').addEventListener('change', function () {
+    const type = new URLSearchParams(window.location.search).get('type') || 'all';
+    window.location.href = 'accueil.php?type=' + type + '&genre=' + this.value;
+});
+
 </script>
 
 <div id="confirmation-message" style="

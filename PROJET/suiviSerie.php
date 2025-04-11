@@ -212,7 +212,14 @@ $terminees = $stmt2->fetchAll(PDO::FETCH_ASSOC);
             color: #ccc;
             margin-top: 4px;
         }
+        .titre-episode a {
+            color: #e50914; /* rouge Netflix */
+            text-decoration: none;
+        }
 
+        .titre-episode a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>

@@ -2,7 +2,7 @@
 require_once 'db_connection.php';
 session_start();
 
-if (!isset($_GET['id_oeuvre']) || !isset($_SESSION['id_utilisateur'])) {
+if (!isset($_GET['id_oeuvre'], $_SESSION['id_utilisateur'])) {
     echo "Paramètres manquants.";
     exit;
 }
@@ -10,7 +10,6 @@ if (!isset($_GET['id_oeuvre']) || !isset($_SESSION['id_utilisateur'])) {
 $id_oeuvre = (int) $_GET['id_oeuvre'];
 $id_utilisateur = $_SESSION['id_utilisateur'];
 
-// Vérifie que c’est une série
 $stmt = $pdo->prepare("SELECT * FROM oeuvre WHERE id_oeuvre = ?");
 $stmt->execute([$id_oeuvre]);
 $oeuvre = $stmt->fetch();
@@ -20,7 +19,6 @@ if (!$oeuvre || $oeuvre['type'] !== 'tv') {
     exit;
 }
 
-// Récupère les saisons et épisodes vus
 $sql = "
 SELECT s.numero_saison, e.numero_episode, e.titre_episode, e.id_episode,
        se.note, se.commentaire
@@ -33,17 +31,18 @@ WHERE s.id_oeuvre = ? AND EXISTS (
 ORDER BY s.numero_saison, e.numero_episode
 ";
 
-// Exécution avec les trois paramètres
 $stmt = $pdo->prepare($sql);
 $stmt->execute([$id_utilisateur, $id_oeuvre, $id_utilisateur]);
-
 $episodes = $stmt->fetchAll();
-
 
 $saisons = [];
 foreach ($episodes as $ep) {
     $saisons[$ep['numero_saison']][] = $ep;
 }
+
+$totalEpisodes = count($episodes);
+$notesValides = array_filter($episodes, fn($e) => $e['note'] !== null);
+$moyenne = count($notesValides) > 0 ? round(array_sum(array_column($notesValides, 'note')) / count($notesValides), 2) : null;
 ?>
 
 <!DOCTYPE html>
@@ -55,40 +54,55 @@ foreach ($episodes as $ep) {
     <style>
         body { background-color: #121212; color: white; font-family: Arial, sans-serif; padding: 2em; }
         h2, h3 { color: #ff4747; }
-        .episode { background: #1e1e1e; margin: 1em 0; padding: 1em; border-radius: 10px; }
-        .note-stars { color: gold; font-size: 1.2em; }
-        textarea { width: 100%; background: #2a2a2a; color: white; border: none; padding: 0.5em; border-radius: 5px; }
-
         .saison {
             background-color: #1e1e1e;
-            color: white;
             padding: 10px;
-            margin: 5px 0;
+            margin: 20px 0 10px;
+            border-left: 4px solid #ff4747;
+            font-size: 1.4em;
+            font-weight: bold;
             cursor: pointer;
-            border-radius: 5px;
-            font-size: 1.2em;
-            text-align: left;
-            width: 100%;
-            border: none;
         }
-
-        .saison:hover {
-            background-color: #ff4747;
-        }
-
         .episodes {
             display: none;
-            padding-left: 20px;
-            margin-top: 10px;
+            margin-left: 15px;
         }
-
         .episode {
             background-color: #2a2a2a;
-            margin: 0.5em 0;
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .note-stars {
+            display: inline-flex;
+            gap: 4px;
+            margin-bottom: 10px;
+        }
+        .note-stars .star {
+            font-size: 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #ccc;
+            transition: transform 0.2s, color 0.2s;
+        }
+        .note-stars .star.active,
+        .note-stars .star:hover {
+            color: #ffcc00;
+        }
+        .note-stars .star:focus {
+            outline: 2px solid #ff4747;
+        }
+        textarea {
+            width: 100%;
+            background: #1e1e1e;
+            color: white;
+            border: 1px solid #444;
             padding: 0.5em;
             border-radius: 5px;
+            resize: vertical;
+            margin-bottom: 10px;
         }
-
         button {
             background-color: #ff4747;
             color: white;
@@ -98,107 +112,51 @@ foreach ($episodes as $ep) {
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s, transform 0.2s;
-            margin-top: 10px;
         }
         button:hover {
             background-color: #ff2b2b;
             transform: scale(1.05);
         }
-
         button:active {
             background-color: #ff4747;
             transform: scale(1);
         }
-
-        .note-stars {
-            display: inline-flex;
+        .confirmation-message {
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            font-weight: bold;
+            margin-top: 5px;
         }
-
-        .note-stars .star {
-            font-size: 24px;
-            color: #ccc;
-            line-height: 1;
-        }
-
-        .note-stars .star.active {
-            color: #ffcc00;
-        }
-
-        .rating {
-            display: inline-block;
-            direction: rtl;
-            margin-bottom: 10px;
-        }
-
-        .rating input[type="radio"] {
-            display: none;
-        }
-
-        .rating label {
-            font-size: 24px;
-            color: #ccc;
-            cursor: pointer;
-        }
-
-        .rating label:hover,
-        .rating label:hover ~ label {
-            color: #ffcc00;
-        }
-
-        textarea {
-            width: 100%;
-            background: #2a2a2a;
-            color: white;
-            border: 1px solid #444;
-            padding: 0.5em;
-            border-radius: 5px;
-            resize: vertical;
-            margin-bottom: 10px;
-        }
-
-        textarea:focus {
-            border-color: #ff4747;
-            outline: none;
+        .confirmation-message.visible {
+            opacity: 1;
         }
     </style>
 </head>
 <body>
 
 <h2><?= htmlspecialchars($oeuvre['titre']) ?></h2>
+<p>
+    <strong>Épisodes vus :</strong> <?= $totalEpisodes ?><br>
+    <strong>Note moyenne :</strong> <span id="note-moyenne"><?= $moyenne !== null ? $moyenne . ' / 5' : 'Non noté' ?></span>
+</p>
 
 <?php foreach ($saisons as $numSaison => $eps): ?>
-    <div class="saison" onclick="toggleEpisodes(<?= $numSaison ?>)">
-        Saison <?= $numSaison ?>
-    </div>
-
+    <div class="saison" onclick="toggleEpisodes(<?= $numSaison ?>)">Saison <?= $numSaison ?></div>
     <div class="episodes" id="episodes-<?= $numSaison ?>">
         <?php foreach ($eps as $ep): ?>
             <div class="episode">
                 <strong>Épisode <?= $ep['numero_episode'] ?> — <?= htmlspecialchars($ep['titre_episode']) ?></strong><br>
-
-                <span class="note-stars" id="stars-<?= $ep['id_episode'] ?>">
+                <div class="note-stars" id="stars-<?= $ep['id_episode'] ?>" data-note="<?= (int) $ep['note'] ?>">
                     <?php for ($i = 1; $i <= 5; $i++): ?>
-                        <span class="star<?= ($ep['note'] >= $i) ? ' active' : '' ?>">★</span>
+                        <button class="star<?= ($ep['note'] >= $i) ? ' active' : '' ?>"
+                                onclick="handleStarClick(<?= $ep['id_episode'] ?>, <?= $i ?>)"
+                                aria-label="Note <?= $i ?>/5" title="Note <?= $i ?>/5">★</button>
                     <?php endfor; ?>
-                </span>
-
-                <strong>Commentaire :</strong><br>
-                <div style="margin-top: 5px;" id="commentaire-<?= $ep['id_episode'] ?>">
-                    <?= nl2br(htmlspecialchars($ep['commentaire'] ?? 'Aucun commentaire')) ?>
                 </div>
-
-                <button onclick="toggleModifier(<?= $ep['id_episode'] ?>)">Modifier</button>
-
-                <div id="modif-zone-<?= $ep['id_episode'] ?>" style="display:none; margin-top: 10px;">
-                    <div class="rating" data-episode-id="<?= $ep['id_episode'] ?>">
-                        <?php for ($i = 5; $i >= 1; $i--): ?>
-                            <input type="radio" id="star<?= $i ?>-<?= $ep['id_episode'] ?>" name="note-<?= $ep['id_episode'] ?>" value="<?= $i ?>" <?= ($ep['note'] == $i) ? 'checked' : '' ?>>
-                            <label for="star<?= $i ?>-<?= $ep['id_episode'] ?>">★</label>
-                        <?php endfor; ?>
-                    </div>
-                    <textarea id="commentaire-input-<?= $ep['id_episode'] ?>" rows="3" style="margin-top: 10px;"><?= htmlspecialchars($ep['commentaire'] ?? '') ?></textarea><br>
-                    <button onclick="appliquerModifs(<?= $ep['id_episode'] ?>)">Appliquer</button>
-                </div>
+                <span id="feedback-note-<?= $ep['id_episode'] ?>" class="confirmation-message"></span>
+                <textarea id="commentaire-input-<?= $ep['id_episode'] ?>" rows="3"><?= htmlspecialchars($ep['commentaire'] ?? '') ?></textarea><br>
+                <button onclick="appliquerModifs(<?= $ep['id_episode'] ?>)">Modifier le commentaire</button>
+                <span id="feedback-<?= $ep['id_episode'] ?>" class="confirmation-message"></span>
             </div>
         <?php endforeach; ?>
     </div>
@@ -206,142 +164,78 @@ foreach ($episodes as $ep) {
 
 <script>
     function toggleEpisodes(saisonId) {
-        const episodesDiv = document.getElementById('episodes-' + saisonId);
-        episodesDiv.style.display = episodesDiv.style.display === 'none' ? 'block' : 'none';
+        const section = document.getElementById('episodes-' + saisonId);
+        section.style.display = section.style.display === 'block' ? 'none' : 'block';
     }
 
-    function toggleModifier(id) {
-        const zone = document.getElementById('modif-zone-' + id);
-        zone.style.display = zone.style.display === 'none' ? 'block' : 'none';
+    function handleStarClick(episodeId, starValue) {
+        const starsWrapper = document.getElementById('stars-' + episodeId);
+        const stars = starsWrapper.querySelectorAll('.star');
+        const currentNote = parseInt(starsWrapper.dataset.note || 0);
+        const newNote = (currentNote === starValue) ? 0 : starValue;
+
+        starsWrapper.dataset.note = newNote;
+        stars.forEach((star, index) => {
+            star.classList.toggle('active', index < newNote);
+        });
+
+        fetch("modifier_suivi_episode.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: `id_episode=${episodeId}&field=note&value=${newNote}`
+        }).then(response => {
+            if (!response.ok) throw new Error("Erreur serveur");
+            showConfirmation(document.getElementById('feedback-note-' + episodeId), "Note enregistrée ✅");
+            updateGlobalStats();
+        }).catch(() => {
+            showConfirmation(document.getElementById('feedback-note-' + episodeId), "Erreur ❌");
+        });
     }
 
     function appliquerModifs(id) {
-        const note = document.querySelector(`input[name="note-${id}"]:checked`);
         const commentaire = document.getElementById(`commentaire-input-${id}`).value;
-
-        // Mise à jour des étoiles en temps réel
-        const majStars = (noteValue) => {
-            const starsSpan = document.getElementById('stars-' + id);
-            starsSpan.innerHTML = '';
-            for (let i = 1; i <= 5; i++) {
-                const star = document.createElement('span');
-                star.className = 'star' + (noteValue >= i ? ' active' : '');
-                star.textContent = '★';
-                starsSpan.appendChild(star);
-            }
-        };
-
-        if (note) {
-            fetch("modifier_suivi_episode.php", {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: `id_episode=${id}&field=note&value=${note.value}`
-            }).then(() => majStars(parseInt(note.value)));
-        }
 
         fetch("modifier_suivi_episode.php", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: `id_episode=${id}&field=commentaire&value=${encodeURIComponent(commentaire)}`
         }).then(() => {
-            const commentaireDiv = document.getElementById('commentaire-' + id);
-            commentaireDiv.innerHTML = commentaire.trim() !== '' ? commentaire.replace(/\n/g, '<br>') : 'Aucun commentaire';
+            showConfirmation(document.getElementById('feedback-' + id), "Commentaire enregistré ✅");
+        }).catch(() => {
+            showConfirmation(document.getElementById('feedback-' + id), "Erreur ❌");
         });
-
-        document.getElementById('modif-zone-' + id).style.display = 'none';
     }
 
-    // Fonction pour ajuster dynamiquement la hauteur de la zone de commentaire
-    function adjustTextArea(id) {
-        const textarea = document.getElementById(`commentaire-input-${id}`);
-        textarea.style.height = 'auto';
-        textarea.style.height = (textarea.scrollHeight) + 'px';
+    function showConfirmation(targetElement, message) {
+        targetElement.textContent = message;
+        targetElement.classList.add('visible');
+        targetElement.style.color = message.includes('✅') ? '#8bc34a' : '#ff4747';
+        setTimeout(() => {
+            targetElement.classList.remove('visible');
+        }, 2000);
+        setTimeout(() => {
+            targetElement.textContent = '';
+        }, 2500);
     }
 
-    // Fonction pour gérer le clic sur les étoiles et mettre à jour la note
-    function handleStarClick(id, starValue) {
-        // Mettre à jour la note dans l'input radio correspondant
-        const radio = document.querySelector(`input[name="note-${id}"][value="${starValue}"]`);
-        radio.checked = true;
+    function updateGlobalStats() {
+        const allStars = document.querySelectorAll('.note-stars');
+        let total = 0;
+        let count = 0;
 
-        // Mise à jour des étoiles visuellement
-        const starsSpan = document.getElementById('stars-' + id);
-        const stars = starsSpan.querySelectorAll('.star');
-        stars.forEach((star, index) => {
-            if (index < starValue) {
-                star.classList.add('active');
-            } else {
-                star.classList.remove('active');
+        allStars.forEach(starGroup => {
+            const note = parseInt(starGroup.dataset.note || 0);
+            if (note > 0) {
+                total += note;
+                count++;
             }
         });
 
-        // Envoyer la note au serveur
-        fetch("modifier_suivi_episode.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: `id_episode=${id}&field=note&value=${starValue}`
-        });
+        const moyenne = count > 0 ? (total / count).toFixed(2) : null;
+        const noteMoyenneSpan = document.getElementById('note-moyenne');
+        noteMoyenneSpan.textContent = moyenne ? `${moyenne} / 5` : "Non noté";
     }
-
-    document.addEventListener("DOMContentLoaded", () => {
-        const textareas = document.querySelectorAll('textarea');
-        textareas.forEach(textarea => {
-            textarea.addEventListener('input', () => {
-                const id = textarea.id.split('-')[2]; 
-                adjustTextArea(id);
-            });
-        });
-
-        // Ajouter des gestionnaires de clics sur les étoiles
-        const starElements = document.querySelectorAll('.note-stars .star');
-        starElements.forEach(star => {
-            star.addEventListener('click', () => {
-                const episodeId = star.parentNode.id.replace('stars-', '');
-                const starValue = Array.from(star.parentNode.children).indexOf(star) + 1;
-                handleStarClick(episodeId, starValue);
-            });
-
-            // Gestion du survol (pour l'effet de survol avec la souris)
-            star.addEventListener('mouseover', () => {
-                const episodeId = star.parentNode.id.replace('stars-', '');
-                const starValue = Array.from(star.parentNode.children).indexOf(star) + 1;
-                const starsSpan = document.getElementById('stars-' + episodeId);
-                const stars = starsSpan.querySelectorAll('.star');
-                stars.forEach((s, index) => {
-                    if (index < starValue) {
-                        s.classList.add('active');
-                    } else {
-                        s.classList.remove('active');
-                    }
-                });
-            });
-
-            // Gestion de la sortie du survol
-            star.addEventListener('mouseout', () => {
-                const episodeId = star.parentNode.id.replace('stars-', '');
-                const starsSpan = document.getElementById('stars-' + episodeId);
-                const stars = starsSpan.querySelectorAll('.star');
-                const checkedStar = Array.from(stars).find(star => star.classList.contains('active'));
-                if (checkedStar) {
-                    // Garder la couleur active sur l'étoile sélectionnée
-                    const index = Array.from(stars).indexOf(checkedStar) + 1;
-                    stars.forEach((s, idx) => {
-                        if (idx < index) {
-                            s.classList.add('active');
-                        } else {
-                            s.classList.remove('active');
-                        }
-                    });
-                } else {
-                    // Aucun star n'est sélectionné, réinitialiser
-                    stars.forEach(s => s.classList.remove('active'));
-                }
-            });
-        });
-    });
 </script>
-
-
 
 </body>
 </html>

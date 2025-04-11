@@ -177,13 +177,14 @@ foreach ($films as $film) {
                     <div class="catalogue-item" data-id="<?= $film['id_oeuvre'] ?>" data-type="<?= $type_affiche ?>">
                         <div class="poster-container">
                             <button class="delete-btn" data-id="<?= $film['id_oeuvre'] ?>">✖</button>
-<<<<<<< HEAD
-                            <img src="<?= htmlspecialchars($film['affiche']) ?>" alt="<?= htmlspecialchars($film['titre']) ?>">
-=======
-                            <a href="details_serie.php?id_oeuvre=<?= htmlspecialchars($film['id_oeuvre']) ?>">
+                            <?php if ($film['type'] === 'tv'): ?>
+                                <a href="details_serie.php?id_oeuvre=<?= htmlspecialchars($film['id_oeuvre']) ?>">
+                                    <img src="<?= htmlspecialchars($film['affiche']) ?>" alt="<?= htmlspecialchars($film['titre']) ?>">
+                                </a>
+                            <?php else: ?>
                                 <img src="<?= htmlspecialchars($film['affiche']) ?>" alt="<?= htmlspecialchars($film['titre']) ?>">
-                            </a>
->>>>>>> eb0366f (Page details_serie)
+                            <?php endif; ?>
+
                         </div>
                         <h3><?= htmlspecialchars($film['titre']) ?></h3>
                         <label>Statut :</label>

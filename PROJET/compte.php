@@ -266,7 +266,13 @@ $seriesVues = array_filter($oeuvresVues, fn($o) => $o['type'] === 'tv');
     <div class="carousel-container">
         <?php foreach ($seriesVues as $serie): ?>
             <div class="carousel-item">
+<<<<<<< HEAD
                 <img src="<?= htmlspecialchars($serie['affiche']) ?>" alt="<?= htmlspecialchars($serie['titre']) ?>">
+=======
+                <a href="details_serie.php?id_oeuvre=<?= $serie['id_oeuvre'] ?>">
+                    <img src="<?= htmlspecialchars($serie['affiche']) ?>" alt="<?= htmlspecialchars($serie['titre']) ?>">
+                </a>
+>>>>>>> eb0366f (Page details_serie)
                 <div class="carousel-item-title"><?= htmlspecialchars($serie['titre']) ?></div>
             </div>
         <?php endforeach; ?>

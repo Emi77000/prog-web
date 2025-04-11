@@ -51,7 +51,7 @@ if (!$alreadyInCatalog) {
                                      VALUES (?, ?, ?)");
     $stmt_catalogue->execute([$id_utilisateur, $id_tmdb, $type]);
 } else {
-    echo json_encode(['info' => 'Cette œuvre est déjà présente dans votre catalogue.']);
+    echo json_encode(['info' => 'Déjà dans votre catalogue.']);
     exit;
 }
 

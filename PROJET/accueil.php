@@ -60,10 +60,19 @@ if ($type === 'tv') {
 } elseif ($type === 'movie') {
     $genres = fetchTMDB("genre/movie/list")['genres'] ?? [];
 } else {
-    $genres = array_merge(
-        fetchTMDB("genre/movie/list")['genres'] ?? [],
-        fetchTMDB("genre/tv/list")['genres'] ?? []
-    );
+    $genresMovie = fetchTMDB("genre/movie/list")['genres'] ?? [];
+    $genresTv = fetchTMDB("genre/tv/list")['genres'] ?? [];
+
+    $genres = [];
+    $addedNames = [];
+
+    foreach (array_merge($genresMovie, $genresTv) as $genre) {
+        $nomGenreMin = strtolower($genre['name']);
+        if (!in_array($nomGenreMin, $addedNames)) {
+            $genres[] = $genre;
+            $addedNames[] = $nomGenreMin;
+        }
+    }
 }
 
 $sections = [];
@@ -406,6 +415,9 @@ $genreId = $_GET['genre'] ?? null;
                 </div>
             <?php endforeach; ?>
         </div> <!-- fin .resultats-recherche -->
+        <?php if (empty($resultatsRecherche)): ?>
+            <p style="color: white; margin-left: 30px;">Aucun résultat trouvé pour "<?= htmlspecialchars($termeRecherche) ?>"</p>
+        <?php endif; ?>
     <?php endif; ?>
 
 
@@ -466,7 +478,7 @@ $genreId = $_GET['genre'] ?? null;
                 .then(data => {
                     document.getElementById('modal-details').innerHTML = data;
                     modal.style.display = "block";
-                    activerBoutonsAjout(); // 👈 relie les boutons une fois le HTML injecté
+                    activerBoutonsAjout();
                 })
                 .catch(error => console.error('Erreur de chargement des détails :', error));
         });

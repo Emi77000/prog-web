@@ -62,18 +62,18 @@ foreach ($films as $film) {
             background-color: #e50914; /* Couleur de fond rouge */
             color: white; /* Couleur du texte */
             border-radius: 30px; /* Coins arrondis */
-            transition: all 0.3s ease; /* Ajoute une transition douce pour les effets */
-        }
-
-        .tab-button.active {
-            background-color: #f40612; /* Couleur de fond quand actif */
-            color: white; /* Texte blanc quand actif */
+            transition: all 0.3s ease; /* Transition douce */
         }
 
         .tab-button:hover {
             background-color: white; /* Fond blanc au survol */
             color: #e50914; /* Texte rouge au survol */
+            transform: scale(1.1); /* Agrandissement au survol */
+        }
 
+        .tab-button.active {
+            background-color: #e50914; /* Fond rouge actif */
+            color: white;
         }
 
         .modal-confirm {
@@ -138,6 +138,59 @@ foreach ($films as $film) {
             background-color: #666;
         }
 
+        .catalogue-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 25px;
+            padding: 20px 10px;
+        }
+
+        .catalogue-item {
+            background-color: #1e1e1e;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+            color: white;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .catalogue-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 18px rgba(0, 0, 0, 0.4);
+        }
+
+        .catalogue-item img {
+            max-width: 100%;
+            border-radius: 12px;
+            height: 300px;
+            object-fit: cover;
+            margin-bottom: 10px;
+        }
+
+        .catalogue-item h3 {
+            font-size: 18px;
+            margin: 10px 0 5px;
+            color: #fff;
+        }
+
+        .catalogue-item select,
+        .catalogue-item textarea {
+            width: 100%;
+            padding: 8px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            background-color: #2c2c2c;
+            color: white;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+
+        .catalogue-item textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
 
         .poster-container { position: relative; display: inline-block; width: 100%; }
         .delete-btn { position: absolute; top: 5px; right: 5px; background-color: rgba(255, 0, 0, 0.7); color: white; border: none; width: 24px; height: 24px; font-size: 18px; font-weight: bold; text-align: center; cursor: pointer; border-radius: 50%; line-height: 24px; display: flex; align-items: center; justify-content: center; transition: background-color 0.3s ease-in-out; }
@@ -163,9 +216,9 @@ foreach ($films as $film) {
     <h2>Films et Séries Ajoutés</h2>
 
     <div class="tabs">
-        <button class="tab-button active" data-filter="all">Tout</button>
-        <button class="tab-button" data-filter="film">Films</button>
-        <button class="tab-button" data-filter="serie">Séries</button>
+        <a class="tab-button active" data-filter="all">Tout</a>
+        <a class="tab-button" data-filter="film">Films</a>
+        <a class="tab-button" data-filter="serie">Séries</a>
     </div>
 
     <?php foreach (["à voir", "en cours", "vu"] as $statut): ?>

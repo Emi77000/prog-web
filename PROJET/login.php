@@ -89,8 +89,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            gap: 40px;
-            flex-wrap: wrap;
             padding: 20px;
         }
 
@@ -110,33 +108,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             color: #fff;
         }
 
-        input[type="text"], input[type="email"], input[type="password"] {
+        form {
             width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
+            max-width: 350px;
+            margin: auto;
         }
 
-        input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus {
+        form input,
+        form button {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px;
+            margin: 10px 0;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        form input {
+            border: 2px solid #ddd;
+        }
+
+        form input:focus {
             border-color: #e50914;
             outline: none;
         }
 
-        button {
-            width: 100%;
-            padding: 14px;
+        form button {
             background-color: #e50914;
             color: white;
-            font-size: 16px;
+            font-weight: bold;
             border: none;
-            border-radius: 5px;
-            cursor: pointer;
             transition: background-color 0.3s ease;
         }
 
-        button:hover {
+        form button:hover {
             background-color: #f40612;
         }
 
@@ -223,7 +228,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         </form>
         <p><a href="javascript:void(0);" onclick="toggleLoginForm()">Déjà un compte ? Se connecter ici</a></p>
     </div>
-
 </div>
 
 <footer class="footer">

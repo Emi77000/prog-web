@@ -104,20 +104,21 @@ $id_tmdb = $id;
         }
 
         .details-text {
-            max-width: 650px;
-            text-align: left;
-            color: #ccc;
+            background-color : #1e1e1e;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
         }
 
         .details-text h2 {
-            font-size: 2.5em;
-            margin-top: 20px;
+            font-size: 1.8em;
+            margin-top: 10px;
         }
 
         .details-text p {
-            font-size: 1.2em;
-            margin-top: 10px;
-            line-height: 1.6;
+            font-size: 1em;
+            line-height: 1.5;
+            margin-top: 8px;
         }
 
         .buttons-container {
@@ -152,25 +153,25 @@ $id_tmdb = $id;
         .modal {
             display: none;
             position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
+            z-index: 1000;
+            inset: 0;
             background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .modal-content {
             background-color: #222;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
+            padding: 20px 30px;
             width: 60%;
             max-width: 800px;
             color: white;
             border-radius: 10px;
+            position: relative;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
         }
+
 
         .close {
             color: white;
@@ -185,10 +186,28 @@ $id_tmdb = $id;
         .close:hover, .close:focus {
             color: #f40612;
         }
+
+        .back-to-home {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: transparent;
+            color: white;
+            font-size: 1em;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+
+        .back-to-home:hover {
+            color: #e50914;
+        }
+
     </style>
 </head>
 <body>
-
 <main class="details-container">
     <img src="<?= htmlspecialchars($poster) ?>" alt="Poster de <?= htmlspecialchars($title) ?>">
     <div class="details-text">
@@ -212,23 +231,9 @@ $id_tmdb = $id;
             <button class="add-to-catalog" data-id="<?= htmlspecialchars($id_tmdb) ?>" data-type="<?= htmlspecialchars($type) ?>">
                 Ajouter au catalogue
             </button>
-
-            <div class="back-button">
-                <a href="accueil.php?recherche=<?= htmlspecialchars($_GET['recherche'] ?? '') ?>">Retour à l'accueil</a>
-            </div>
         </div>
     </div>
 </main>
-
-<div id="modal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Informations supplémentaires</h2>
-        <p><strong>Genres : </strong><?= implode(', ', $genres) ?></p>
-        <p><strong>Durée : </strong><?= $duree ? $duree . ' minutes' : 'Non spécifiée' ?></p>
-        <p><strong>Description complète : </strong><?= $description ?></p>
-    </div>
-</div>
 
 </body>
 </html>

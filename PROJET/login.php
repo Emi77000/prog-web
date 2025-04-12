@@ -46,6 +46,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $erreur_register = "Le pseudo est trop court.";
     } elseif (strlen($mot_de_passe) < 6) {
         $erreur_register = "Le mot de passe doit contenir au moins 6 caractères.";
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $erreur_register = "Format d'email invalide.";
+
+        
     } else {
         $stmt = $pdo->prepare("SELECT * FROM utilisateur WHERE email = ? OR pseudo = ?");
         $stmt->execute([$email, $pseudo]);

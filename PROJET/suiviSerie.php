@@ -96,7 +96,7 @@ $terminees = $stmt2->fetchAll(PDO::FETCH_ASSOC);
             <li><a href="catalogPerso.php">Mon Catalogue</a></li>
             <li><a href="suiviSerie.php">Suivi séries</a></li>
             <li><a href="compte.php">Compte</a></li>
-            <li><a href="logout.php">Déconnexion (<?= htmlspecialchars($_SESSION['pseudo']) ?>)</a></li>
+            <li><a href="logout.php">Déconnexion</a></li>
         </ul>
     </nav>
 </header>

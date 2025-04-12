@@ -25,10 +25,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'modifier') {
     $nouvelEmail = $_POST['nouveau_email'] ?? '';
     $nouveauMDP = $_POST['nouveau_mot_de_passe'] ?? '';
 
+    // Validation de l'email avec une expression régulière stricte
     if (!empty($nouvelEmail)) {
-        if (!filter_var($nouvelEmail, FILTER_VALIDATE_EMAIL)) {
-            $erreur = "Email invalide.";
+        // Vérification si l'email ne contient pas de '@' ou si la partie après '@' est vide
+        if (strpos($nouvelEmail, '@') === false || substr($nouvelEmail, strpos($nouvelEmail, '@') + 1) === '') {
+            $erreur = "Email invalide. Le format attendu est ___@___.__";
+        } elseif (!preg_match('/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/', $nouvelEmail)) {
+            // Vérification via l'expression régulière pour un email valide
+            $erreur = "Email invalide";
         } else {
+            // Mise à jour de l'email si valide
             $stmt = $pdo->prepare("UPDATE utilisateur SET email = ? WHERE id_utilisateur = ?");
             $stmt->execute([$nouvelEmail, $id_utilisateur]);
             $message = "Email mis à jour.";
@@ -36,6 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'modifier') {
         }
     }
 
+    // Validation du mot de passe
     if (!empty($nouveauMDP)) {
         if (strlen($nouveauMDP) < 6) {
             $erreur = "Le mot de passe doit contenir au moins 6 caractères.";
@@ -47,10 +54,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'modifier') {
         }
     }
 
+    // Vérification si aucun champ n'est rempli
     if (empty($nouvelEmail) && empty($nouveauMDP)) {
         $erreur = "Veuillez remplir au moins un champ.";
     }
 }
+
+
+
+
 
 
 // Récupérer les œuvres vues
@@ -87,9 +99,9 @@ $genresSeries = $stmtGenresSeries->fetchAll();
     <meta charset="UTF-8">
     <title>Mon Compte - TrackFlix</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="compte.css">
+    <link rel="stylesheet" href="compte.css?v=1.0">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="compte.js" type="module"></script>
+    <script src="login.js" type="module"></script>
 </head>
 <body>
 <header class="header">

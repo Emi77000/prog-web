@@ -4,8 +4,15 @@ function validateRegister() {
     let password = document.getElementById("reg-password").value;
     let error = document.getElementById("reg-error");
 
+    let emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
+
+
     if (username.length < 3) {
         error.innerText = "Nom d'utilisateur trop court.";
+        return false;
+    }
+    if (!emailRegex.test(email)) {
+        error.innerText = "Email invalide.";
         return false;
     }
     if (password.length < 6) {
@@ -14,6 +21,7 @@ function validateRegister() {
     }
     return true;
 }
+
 
 function validateLogin() {
     let email = document.getElementById("login-email").value;

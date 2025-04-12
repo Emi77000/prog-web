@@ -60,11 +60,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'modifier') {
     }
 }
 
-
-
-
-
-
 // Récupérer les œuvres vues
 $stmtVus = $pdo->prepare("SELECT cu.*, o.* FROM catalogue_utilisateur cu 
     JOIN oeuvre o ON cu.id_oeuvre = o.id_oeuvre 
@@ -243,57 +238,10 @@ $genresSeries = $stmtGenresSeries->fetchAll();
 </div>
 
 <script>
-    // Récupérer les genres et les comptes des films depuis PHP
-    const genresFilms = <?php echo json_encode($genresFilms); ?>;
-    const genresSeries = <?php echo json_encode($genresSeries); ?>;
-
-    // Fonction pour générer un diagramme en camembert
-    function generatePieChart(ctx, data, labels) {
-        new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: data,
-                    backgroundColor: ['#ff9999','#66b3ff','#99ff99','#ffcc99','#c2c2f0'],
-                }]
-            }
-        });
-    }
-
-    // Films Chart
-    const genresFilmsLabels = genresFilms.map(item => item.genre);
-    const genresFilmsData = genresFilms.map(item => item.count);
-    const filmsCtx = document.getElementById('filmsChart').getContext('2d');
-    generatePieChart(filmsCtx, genresFilmsData, genresFilmsLabels);
-
-    // Séries Chart
-    const genresSeriesLabels = genresSeries.map(item => item.genre);
-    const genresSeriesData = genresSeries.map(item => item.count);
-    const seriesCtx = document.getElementById('seriesChart').getContext('2d');
-    generatePieChart(seriesCtx, genresSeriesData, genresSeriesLabels);
-
-    // Fonction pour générer un diagramme en camembert sans légende
-    function generatePieChart(ctx, data, labels) {
-        new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: data,
-                    backgroundColor: ['#ff5201','#ffc901','#00ca03','#00eec2','#005aee'],
-                }]
-            },
-            options: {
-                plugins: {
-                    legend: {
-                        display: false  // Désactive l'affichage de la légende
-                    }
-                }
-            }
-        });
-    }
-
+    window.genresFilmsData = <?= json_encode($genresFilms) ?>;
+    window.genresSeriesData = <?= json_encode($genresSeries) ?>;
 </script>
+<script src="compte.js" type="module"></script>
+
 </body>
 </html>

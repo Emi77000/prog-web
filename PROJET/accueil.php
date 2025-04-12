@@ -165,7 +165,7 @@ $genreId = $_GET['genre'] ?? null;
     <title>Accueil - TrackFlix</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="accueil.css">
-    <script src="accueil.js" defer></script>
+    <script type="module" src="accueil.js"></script>
 </head>
 <body>
 <header class="header">
@@ -278,68 +278,7 @@ $genreId = $_GET['genre'] ?? null;
     </div>
 </div>
 
-<script type="module">
-    import { activerBoutonsAjout } from './details.js';
+<div id="confirmation-message">
 
-    const modal = document.getElementById("modal");
-    const span = document.getElementsByClassName("close")[0];
-
-    document.querySelectorAll('.carrousel-item a, .resultat-item a').forEach(function (element) {
-        element.addEventListener('click', function (event) {
-            event.preventDefault();
-
-            const urlParams = new URL(this.href).searchParams;
-            const id = urlParams.get('id');
-            const type = urlParams.get('type');
-
-            fetch('details.php?id=' + id + '&type=' + type)
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById('modal-details').innerHTML = data;
-                    modal.style.display = "block";
-                    activerBoutonsAjout();
-                })
-                .catch(error => console.error('Erreur de chargement des détails :', error));
-        });
-    });
-
-    span.onclick = function () {
-        modal.style.display = "none";
-    };
-    window.onclick = function (event) {
-        if (event.target === modal) {
-            modal.style.display = "none";
-        }
-    };
-    document.querySelectorAll('.filter a').forEach(function (element) {
-    element.addEventListener('click', function (event) {
-        event.preventDefault();
-        const genreSelect = document.getElementById('genre-select');
-        const genre = genreSelect.value;
-        window.location.href = this.href + '&genre=' + genre;
-    });
-});
-
-document.getElementById('genre-select').addEventListener('change', function () {
-    const type = new URLSearchParams(window.location.search).get('type') || 'all';
-    window.location.href = 'accueil.php?type=' + type + '&genre=' + this.value;
-});
-
-</script>
-
-<div id="confirmation-message" style="
-    display: none;
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background-color: #28a745;
-    color: white;
-    padding: 15px 25px;
-    border-radius: 8px;
-    font-weight: bold;
-    box-shadow: 0 0 10px rgba(0,0,0,0.3);
-    z-index: 1000;
-    transition: opacity 0.3s ease;
-"> Ajouté au catalogue ! </div>
 </body>
 </html>

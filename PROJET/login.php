@@ -8,11 +8,13 @@ $message = '';
 $afficher_formulaire_inscription = false;
 $old_pseudo = '';
 $old_email = '';
+$old_email_login = '';
 
 // Connexion
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'login') {
     $email = $_POST['email'] ?? '';
     $mot_de_passe = $_POST['mot_de_passe'] ?? '';
+    $old_email_login = $email;
 
     if (!empty($email) && !empty($mot_de_passe)) {
         $stmt = $pdo->prepare("SELECT * FROM utilisateur WHERE email = ?");
@@ -47,9 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     } elseif (strlen($mot_de_passe) < 6) {
         $erreur_register = "Le mot de passe doit contenir au moins 6 caractères.";
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $erreur_register = "Format d'email invalide.";
-
-        
+        $erreur_register = "Email invalide.";
     } else {
         $stmt = $pdo->prepare("SELECT * FROM utilisateur WHERE email = ? OR pseudo = ?");
         $stmt->execute([$email, $pseudo]);
@@ -72,7 +72,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 }
 ?>
 
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -89,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         <h2>Connexion</h2>
         <form method="POST" onsubmit="return validateLogin();">
             <input type="hidden" name="action" value="login">
-            <input type="email" name="email" id="login-email" placeholder="Email" required>
+            <input type="email" name="email" id="login-email" placeholder="Email" required value="<?= htmlspecialchars($old_email_login) ?>">
             <input type="password" name="mot_de_passe" id="login-password" placeholder="Mot de passe" required>
             <button type="submit">Se connecter</button>
             <p id="login-error" class="message">
@@ -104,10 +103,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         <h2>Créer un compte</h2>
         <form method="POST" onsubmit="return validateRegister();">
             <input type="hidden" name="action" value="register">
-            <input type="text" name="pseudo" id="reg-username" placeholder="Pseudo" required
-                   value="<?= htmlspecialchars($old_pseudo) ?>">
-            <input type="email" name="email" id="reg-email" placeholder="Email" required
-                   value="<?= htmlspecialchars($old_email) ?>">
+            <input type="text" name="pseudo" id="reg-username" placeholder="Pseudo" required value="<?= htmlspecialchars($old_pseudo) ?>">
+            <input type="text" name="email" id="reg-email" placeholder="Email" required value="<?= htmlspecialchars($old_email) ?>">
             <input type="password" name="mot_de_passe" id="reg-password" placeholder="Mot de passe" required>
             <button type="submit">S'inscrire</button>
             <p id="reg-error" class="message">
@@ -121,18 +118,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 <footer class="footer">
     <p>&copy; <?= date('Y') ?> TrackFlix</p>
 </footer>
-
-<script>
-    function toggleRegisterForm() {
-        document.querySelector('.register-box').style.display = 'block';
-        document.querySelector('.box').style.display = 'none';
-    }
-
-    function toggleLoginForm() {
-        document.querySelector('.box').style.display = 'block';
-        document.querySelector('.register-box').style.display = 'none';
-    }
-</script>
 
 </body>
 </html>

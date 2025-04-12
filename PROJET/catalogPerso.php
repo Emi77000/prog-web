@@ -63,7 +63,7 @@ foreach ($films as $film) {
     <h2>Films et Séries Ajoutés</h2>
 
     <div class="tabs">
-        <a class="tab-button active" data-filter="all">Tout</a>
+        <a class="tab-button" data-filter="all">Tout</a>
         <a class="tab-button" data-filter="film">Films</a>
         <a class="tab-button" data-filter="serie">Séries</a>
     </div>

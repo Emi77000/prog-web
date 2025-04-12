@@ -1,0 +1,117 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #121212;
+    color: #fff;
+    margin: 0;
+    padding: 2rem;
+}
+
+h2 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: #e50914;
+}
+
+p {
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+}
+
+.btn-retour {
+    background-color: transparent;
+    color: #fff;
+    border: none;
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.btn-retour:hover {
+    background-color: #f40612;
+}
+
+.saison {
+    background-color: #1f1f1f;
+    padding: 0.8rem 1.2rem;
+    margin-top: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    border-left: 4px solid #e50914;
+    transition: background-color 0.2s;
+}
+
+.saison:hover {
+    background-color: #2a2a2a;
+}
+
+.episodes {
+    display: none;
+    padding-left: 1rem;
+    margin-bottom: 1rem;
+    border-left: 2px solid #333;
+}
+
+.episode {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #1a1a1a;
+    border-radius: 10px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.5);
+}
+
+.episode strong {
+    font-size: 1.1rem;
+    color: #f1f1f1;
+}
+
+textarea {
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 6px;
+    background-color: #2b2b2b;
+    color: #fff;
+    border: 1px solid #444;
+    resize: vertical;
+}
+
+button {
+    margin-top: 0.5rem;
+    padding: 0.4rem 1rem;
+    background-color: #e50914;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #f40612;
+}
+
+.note-stars {
+    margin-top: 0.5rem;
+}
+
+.note-stars .star {
+    background: none;
+    border: none;
+    color: #555;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.note-stars .star.active,
+.note-stars .star:hover {
+    color: #ffcc00;
+}
+
+.confirmation-message {
+    font-size: 0.9rem;
+    color: #6af06a;
+    display: block;
+    margin-top: 0.3rem;
+}

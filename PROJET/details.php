@@ -48,164 +48,7 @@ $id_tmdb = $id;
     <meta charset="UTF-8">
     <title>Détails - <?= htmlspecialchars($title) ?> - Mon Catalogue</title>
     <link rel="stylesheet" href="styles.css">
-    <style>
-        body {
-            background-color: #141414;
-            color: white;
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-
-        .header {
-            background-color: #141414;
-            padding: 15px 0;
-            text-align: center;
-        }
-
-        .logo a {
-            color: white;
-            text-decoration: none;
-            font-size: 2em;
-        }
-
-        .back-button {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .back-button a {
-            color: white;
-            text-decoration: none;
-            background-color: #e50914;
-            padding: 10px 20px;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-
-        .back-button a:hover {
-            background-color: #f40612;
-        }
-
-        .details-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 30px;
-            padding: 0 20px;
-        }
-
-        .details-container img {
-            width: 300px;
-            height: 450px;
-            object-fit: cover;
-            border-radius: 10px;
-            margin-right: 40px;
-        }
-
-        .details-text {
-            background-color : #1e1e1e;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
-        }
-
-        .details-text h2 {
-            font-size: 1.8em;
-            margin-top: 10px;
-        }
-
-        .details-text p {
-            font-size: 1em;
-            line-height: 1.5;
-            margin-top: 8px;
-        }
-
-        .buttons-container {
-            display: flex;
-            gap: 20px;
-            margin-top: 20px;
-            width: 100%;
-        }
-
-        .add-to-catalog, .back-button a {
-            padding: 10px 20px;
-            background-color: #e50914;
-            color: white;
-            border-radius: 5px;
-            font-weight: bold;
-            text-decoration: none;
-            border: none;
-            cursor: pointer;
-            display: inline-block;
-            flex: 1;
-            text-align: center;
-        }
-
-        .back-button a {
-            background-color: black;
-        }
-
-        .add-to-catalog:hover, .back-button a:hover {
-            background-color: #f40612;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            inset: 0;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background-color: #222;
-            padding: 20px 30px;
-            width: 60%;
-            max-width: 800px;
-            color: white;
-            border-radius: 10px;
-            position: relative;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-        }
-
-
-        .close {
-            color: white;
-            font-size: 28px;
-            font-weight: bold;
-            position: absolute;
-            top: 0;
-            right: 10px;
-            cursor: pointer;
-        }
-
-        .close:hover, .close:focus {
-            color: #f40612;
-        }
-
-        .back-to-home {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background-color: transparent;
-            color: white;
-            font-size: 1em;
-            text-decoration: none;
-            font-weight: bold;
-            transition: color 0.3s ease;
-            padding: 8px 12px;
-            border-radius: 6px;
-        }
-
-        .back-to-home:hover {
-            color: #e50914;
-        }
-
-    </style>
+    <link rel="stylesheet" href="details.css">
 </head>
 <body>
 <main class="details-container">
@@ -215,12 +58,10 @@ $id_tmdb = $id;
         <p><strong>Date de sortie : </strong><?= htmlspecialchars($release_date) ?></p>
         <p><?= htmlspecialchars($overview) ?></p>
 
-        <!-- Afficher les genres si disponibles -->
         <?php if (!empty($genres)): ?>
             <p><strong>Genres : </strong><?= implode(', ', $genres) ?></p>
         <?php endif; ?>
 
-        <!-- Afficher la durée si disponible -->
         <?php if ($duree): ?>
             <p><strong>Durée : </strong><?= htmlspecialchars($duree) ?> minutes</p>
         <?php else: ?>

@@ -50,3 +50,4 @@ function afficherMessageConfirmation(message) {
         }, 300);
     }, 2500); // visible 2.5 secondes
 }
+

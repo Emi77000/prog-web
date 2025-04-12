@@ -30,7 +30,7 @@ if (!$ep) {
     exit;
 }
 ?>
-
+<link rel="stylesheet" href="details.css">
 <h2><?= htmlspecialchars($ep['titre_serie']) ?> — S<?= $ep['numero_saison'] ?>E<?= $ep['numero_episode'] ?></h2>
 <p><strong>Titre de l’épisode :</strong> <?= htmlspecialchars($ep['titre_episode']) ?></p>
 <p><strong>Date :</strong> <?= $ep['date_diffusion'] ?? 'Inconnue' ?></p>
@@ -52,28 +52,6 @@ if (!$ep) {
     <br><br>
     <button id="marquer-vu" data-id="<?= $ep['id_episode'] ?>" style="padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">✅ Marquer comme vu</button>
 </div>
-
-<style>
-    .rating {
-        display: inline-block;
-        direction: rtl;
-    }
-    .rating input[type="radio"] {
-        display: none;
-    }
-    .rating label {
-        font-size: 24px;
-        color: #ccc;
-        cursor: pointer;
-    }
-    .rating input[type="radio"]:checked ~ label {
-        color: #ffcc00;
-    }
-    .rating label:hover,
-    .rating label:hover ~ label {
-        color: #ffcc00;
-    }
-</style>
 
 <script>
     document.querySelectorAll('.update-episode-star').forEach(star => {

@@ -1,0 +1,154 @@
+/* Styles CSS (inchangés) */
+.stats {
+    margin: 2em 0;
+    display: flex;
+    justify-content: center;
+    gap: 3em;
+}
+.carousel-container {
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 1em 0;
+}
+.carousel-item {
+    display: inline-block;
+    margin-right: 15px;
+    width: 150px;
+    vertical-align: top;
+}
+.carousel-item img {
+    width: 100%;
+    border-radius: 10px;
+}
+.carousel-item-title {
+    text-align: center;
+    margin-top: 0.5em;
+    font-weight: bold;
+    color: #fff;
+}
+.account-info {
+    background-color: #1f1f1f;
+    color: white;
+    padding: 2em;
+    border-radius: 10px;
+    width: 60%;
+    margin: 2em auto;
+}
+.account-container {
+    display: flex;
+    justify-content: center;
+    gap: 2em;
+    margin: 2em auto;
+    width: 100%;
+    flex-wrap: nowrap;
+}
+.account-info,
+.form-container {
+    width: 40%;
+    min-width: 300px;
+}
+h2 {
+    color: #e50914;
+    border-bottom: 2px solid #e50914;
+    padding-bottom: 5px;
+}
+.form-container {
+    background-color: #1f1f1f;
+    padding: 2em;
+    border-radius: 10px;
+    width: 60%;
+    margin: 2em auto;
+    color: white;
+}
+input[type="email"], input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+}
+button {
+    width: 100%;
+    padding: 14px;
+    background-color: #e50914;
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+button:hover {
+    background-color:rgb(247, 55, 64);
+}
+.message {
+    color: red;
+    margin-top: 20px;
+    font-size: 14px;
+}
+.success {
+    color: #28a745;
+}
+.stats {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 1em;
+    margin-top: 2em;
+}
+
+.stat-card {
+    background-color: #1f1f1f;
+    color: white;
+    width: 250px;
+    border-radius: 10px;
+    padding: 1.5em;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.stat-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+}
+
+.stat-icon {
+    font-size: 2em;
+    margin-bottom: 1em;
+    color: #e50914;
+}
+
+.stat-info {
+    font-size: 1.2em;
+    margin-bottom: 1em;
+}
+
+.stat-info strong {
+    display: block;
+    font-size: 1.4em;
+    margin-bottom: 0.5em;
+}
+
+.stat-footer {
+    font-size: 0.9em;
+    color: #777;
+}
+
+.stat-footer span {
+    font-style: italic;
+}
+.charts {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 2em;
+}
+.chart {
+    background-color: #1f1f1f;
+    padding: 1em;
+    text-align: center;
+    width: 38%;
+    min-width: 300px;
+}

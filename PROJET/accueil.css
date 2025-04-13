@@ -67,7 +67,13 @@
 .carrousel h2 {
     margin-left: 20px;
     font-size: 1.5em;
+    color: white !important;
 }
+.carrousel h2:hover,
+.carrousel h2:focus {
+    color: white !important;
+}
+
 .carrousel-items {
     display: flex;
     overflow-x: auto;
@@ -139,8 +145,8 @@ box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6); /* Ajoute une ombre portée pour l'ef
     cursor: pointer;
 }
 
-.close:hover,
-.close:focus {
+.modal .close:hover,
+.modal .close:focus {
     color: #f40612;
 }
 
@@ -162,7 +168,6 @@ transition: all 0.3s ease; /* Ajoute une transition douce pour les effets */
 }
 
 .filter a.active {
-    background-color: #ff2a6b; /* Couleur pour le bouton actif */
     background-color: #e50914; /* Couleur pour le bouton actif */
     color: #fff; /* Couleur du texte */
 }
@@ -174,7 +179,7 @@ margin: 0 10px;
 }
 
 header nav ul li a:hover {
-    color: red;  /* Texte devient rouge au survol */
+    color: red;
 }
 
 .search-container {

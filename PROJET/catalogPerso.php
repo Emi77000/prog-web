@@ -88,7 +88,7 @@ foreach ($films as $film) {
                         </div>
                         <h3><?= htmlspecialchars($film['titre']) ?></h3>
                         <label>Statut :</label>
-                        <select class="styled-select update-field" data-field="statut">
+                        <select class="styled-select update-field" data-field="statut" <?= $film['type'] === 'tv' ? 'disabled' : '' ?>>
                             <option value="à voir" <?= $film['statut'] == 'à voir' ? 'selected' : '' ?>>à voir</option>
                             <option value="en cours" <?= $film['statut'] == 'en cours' ? 'selected' : '' ?>>En cours</option>
                             <option value="vu" <?= $film['statut'] == 'vu' ? 'selected' : '' ?>>Vu</option>

@@ -164,7 +164,7 @@ $genreId = $_GET['genre'] ?? null;
     <meta charset="UTF-8">
     <title>Accueil - TrackFlix</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="accueil.css">
+    <link rel="stylesheet" href="accueil.css?v=1">
     <script type="module" src="accueil.js"></script>
 </head>
 <body>
@@ -217,7 +217,7 @@ $genreId = $_GET['genre'] ?? null;
 
     <!-- Résultats de recherche -->
     <?php if (!empty($termeRecherche)): ?>
-        <h2 style="margin-left: 30px;">Résultats pour "<?= htmlspecialchars($termeRecherche) ?>"</h2>
+        <h2 style="margin-left: 30px;">Résultats pour "<?= htmlspecialchars($termeRecherche) ?>"</h2> <br>
         <div class="resultats-recherche">
             <?php foreach ($resultatsRecherche as $media):
                 $titre = !empty($media['title']) ? $media['title'] : (!empty($media['name']) ? $media['name'] : 'Sans titre');
